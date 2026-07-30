@@ -15,8 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->string('nip')->unique();
-            $table->string('name');
-            $table->enum('gender', ['Laki laki', 'Perempuan']);
+            $table->enum('gender', ['Laki-laki', 'Perempuan']);
             $table->string('phone')->nullable();
             $table->string('address')->nullable();
             $table->string('photo')->nullable();

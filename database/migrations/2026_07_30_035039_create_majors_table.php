@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('majors', function (Blueprint $table) {
             $table->id();
             $table->string('code')->unique();
+            $table->string('name');
             $table->timestamps();
         });
     }

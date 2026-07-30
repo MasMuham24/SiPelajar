@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('classroom_id')->constrained()->cascadeOnDelete();
             $table->string('nis')->unique();
             $table->string('nisn')->unique();
-            $table->enum('gender', ['Laki laki', 'Perempuan']);
+            $table->enum('gender', ['Laki-laki', 'Perempuan']);
             $table->string('phone')->nullable();
             $table->string('address')->nullable();
             $table->string('photo')->nullable();
