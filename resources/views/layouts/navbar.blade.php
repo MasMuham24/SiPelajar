@@ -28,11 +28,8 @@
                         <p class="text-sm font-semibold text-gray-900">{{ Auth::user()->name }}</p>
                         <p class="text-xs text-gray-500 capitalize">{{ Auth::user()->role }}</p>
                     </div>
-                    <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                    <a href="{{ route('profile.show') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                         <i class="fas fa-user mr-2"></i> Profil
-                    </a>
-                    <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                        <i class="fas fa-cog mr-2"></i> Pengaturan
                     </a>
                     <form action="{{ route('logout') }}" method="POST" class="block">
                         @csrf

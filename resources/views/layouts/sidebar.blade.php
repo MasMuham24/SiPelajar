@@ -12,16 +12,26 @@
         @if (Auth::user()->role === 'admin')
             <!-- Admin Menu -->
             <a href="{{ route('admin.dashboard') }}" 
-               class="block px-4 py-3 rounded-lg transition {{ request()->routeIs('admin.*') ? 'bg-blue-700' : 'hover:bg-blue-800' }}">
+               class="block px-4 py-3 rounded-lg transition {{ request()->routeIs('admin.dashboard') ? 'bg-blue-700' : 'hover:bg-blue-800' }}">
                 <i class="fas fa-chart-line mr-3"></i> Dashboard
+            </a>
+            <a href="{{ route('admin.students.index') }}" 
+               class="block px-4 py-3 rounded-lg transition {{ request()->routeIs('admin.students.*') ? 'bg-blue-700' : 'hover:bg-blue-800' }}">
+                <i class="fas fa-user-graduate mr-3"></i> Kelola Siswa
+            </a>
+            <a href="{{ route('admin.teachers.index') }}" 
+               class="block px-4 py-3 rounded-lg transition {{ request()->routeIs('admin.teachers.*') ? 'bg-blue-700' : 'hover:bg-blue-800' }}">
+                <i class="fas fa-chalkboard-teacher mr-3"></i> Kelola Guru
             </a>
             <a href="#" class="block px-4 py-3 rounded-lg hover:bg-blue-800 transition">
                 <i class="fas fa-users mr-3"></i> Kelola Pengguna
             </a>
-            <a href="#" class="block px-4 py-3 rounded-lg hover:bg-blue-800 transition">
+            <a href="{{ route('admin.classrooms.index') }}" 
+               class="block px-4 py-3 rounded-lg transition {{ request()->routeIs('admin.classrooms.*') ? 'bg-blue-700' : 'hover:bg-blue-800' }}">
                 <i class="fas fa-graduation-cap mr-3"></i> Kelola Kelas
             </a>
-            <a href="#" class="block px-4 py-3 rounded-lg hover:bg-blue-800 transition">
+            <a href="{{ route('admin.majors.index') }}" 
+               class="block px-4 py-3 rounded-lg transition {{ request()->routeIs('admin.majors.*') ? 'bg-blue-700' : 'hover:bg-blue-800' }}">
                 <i class="fas fa-book mr-3"></i> Kelola Jurusan
             </a>
             <a href="#" class="block px-4 py-3 rounded-lg hover:bg-blue-800 transition">
@@ -31,7 +41,7 @@
         @elseif (Auth::user()->role === 'guru')
             <!-- Guru Menu -->
             <a href="{{ route('guru.dashboard') }}" 
-               class="block px-4 py-3 rounded-lg transition {{ request()->routeIs('guru.*') ? 'bg-blue-700' : 'hover:bg-blue-800' }}">
+               class="block px-4 py-3 rounded-lg transition {{ request()->routeIs('guru.dashboard') ? 'bg-blue-700' : 'hover:bg-blue-800' }}">
                 <i class="fas fa-chart-line mr-3"></i> Dashboard
             </a>
             <a href="#" class="block px-4 py-3 rounded-lg hover:bg-blue-800 transition">
@@ -50,7 +60,7 @@
         @elseif (Auth::user()->role === 'siswa')
             <!-- Siswa Menu -->
             <a href="{{ route('siswa.dashboard') }}" 
-               class="block px-4 py-3 rounded-lg transition {{ request()->routeIs('siswa.*') ? 'bg-blue-700' : 'hover:bg-blue-800' }}">
+               class="block px-4 py-3 rounded-lg transition {{ request()->routeIs('siswa.dashboard') ? 'bg-blue-700' : 'hover:bg-blue-800' }}">
                 <i class="fas fa-chart-line mr-3"></i> Dashboard
             </a>
             <a href="#" class="block px-4 py-3 rounded-lg hover:bg-blue-800 transition">
