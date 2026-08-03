@@ -23,8 +23,9 @@
                class="block px-4 py-3 rounded-lg transition {{ request()->routeIs('admin.teachers.*') ? 'bg-blue-700' : 'hover:bg-blue-800' }}">
                 <i class="fas fa-chalkboard-teacher mr-3"></i> Kelola Guru
             </a>
-            <a href="#" class="block px-4 py-3 rounded-lg hover:bg-blue-800 transition">
-                <i class="fas fa-users mr-3"></i> Kelola Pengguna
+            <a href="{{ route('admin.accounts.index') }}" 
+                    class="block px-4 py-3 rounded-lg transition {{ request()->routeIs('admin.accounts.*') ? 'bg-blue-700' : 'hover:bg-blue-800' }}">
+                <i class="fas fa-users mr-3"></i> Kelola Akun
             </a>
             <a href="{{ route('admin.classrooms.index') }}" 
                class="block px-4 py-3 rounded-lg transition {{ request()->routeIs('admin.classrooms.*') ? 'bg-blue-700' : 'hover:bg-blue-800' }}">
@@ -33,6 +34,10 @@
             <a href="{{ route('admin.majors.index') }}" 
                class="block px-4 py-3 rounded-lg transition {{ request()->routeIs('admin.majors.*') ? 'bg-blue-700' : 'hover:bg-blue-800' }}">
                 <i class="fas fa-book mr-3"></i> Kelola Jurusan
+            </a>
+            <a href="{{ route('admin.offices.index') }}" 
+               class="block px-4 py-3 rounded-lg transition {{ request()->routeIs('admin.offices.*') ? 'bg-blue-700' : 'hover:bg-blue-800' }}">
+                <i class="fas fa-map-marker-alt mr-3"></i> Lokasi Sekolah
             </a>
             <a href="#" class="block px-4 py-3 rounded-lg hover:bg-blue-800 transition">
                 <i class="fas fa-file-alt mr-3"></i> Laporan
@@ -44,13 +49,13 @@
                class="block px-4 py-3 rounded-lg transition {{ request()->routeIs('guru.dashboard') ? 'bg-blue-700' : 'hover:bg-blue-800' }}">
                 <i class="fas fa-chart-line mr-3"></i> Dashboard
             </a>
-            <a href="#" class="block px-4 py-3 rounded-lg hover:bg-blue-800 transition">
+            <a href="{{ route('guru.assignments.index') }}" class="block px-4 py-3 rounded-lg transition {{ request()->routeIs('guru.assignments.*') ? 'bg-blue-700' : 'hover:bg-blue-800' }}">
                 <i class="fas fa-tasks mr-3"></i> Tugas
             </a>
             <a href="#" class="block px-4 py-3 rounded-lg hover:bg-blue-800 transition">
                 <i class="fas fa-users mr-3"></i> Siswa
             </a>
-            <a href="#" class="block px-4 py-3 rounded-lg hover:bg-blue-800 transition">
+            <a href="{{ route('guru.attendance.index') }}" class="block px-4 py-3 rounded-lg transition {{ request()->routeIs('guru.attendance.*') ? 'bg-blue-700' : 'hover:bg-blue-800' }}">
                 <i class="fas fa-clipboard-list mr-3"></i> Absensi
             </a>
             <a href="#" class="block px-4 py-3 rounded-lg hover:bg-blue-800 transition">
@@ -63,11 +68,13 @@
                class="block px-4 py-3 rounded-lg transition {{ request()->routeIs('siswa.dashboard') ? 'bg-blue-700' : 'hover:bg-blue-800' }}">
                 <i class="fas fa-chart-line mr-3"></i> Dashboard
             </a>
-            <a href="#" class="block px-4 py-3 rounded-lg hover:bg-blue-800 transition">
-                <i class="fas fa-book-open mr-3"></i> Tugas Saya
-            </a>
-            <a href="#" class="block px-4 py-3 rounded-lg hover:bg-blue-800 transition">
+            <a href="{{ route('siswa.attendance.index') }}" 
+               class="block px-4 py-3 rounded-lg transition {{ request()->routeIs('siswa.attendance.*') ? 'bg-blue-700' : 'hover:bg-blue-800' }}">
                 <i class="fas fa-clipboard-list mr-3"></i> Absensi
+            </a>
+            <a href="{{ route('siswa.assignments.index') }}" 
+               class="block px-4 py-3 rounded-lg transition {{ request()->routeIs('siswa.assignments.*') ? 'bg-blue-700' : 'hover:bg-blue-800' }}">
+                <i class="fas fa-book-open mr-3"></i> Tugas Saya
             </a>
             <a href="#" class="block px-4 py-3 rounded-lg hover:bg-blue-800 transition">
                 <i class="fas fa-bell mr-3"></i> Pengumuman

@@ -9,17 +9,17 @@ class Student extends Model
 {
     use HasFactory;
 
-protected $fillable = [
-         'user_id',
-         'classroom_id',
-         'nis',
-         'nisn',
-         'gender',
-         'phone',
-         'address',
-         'photo',
-         'name',
-     ];
+    protected $fillable = [
+        'user_id',
+        'classroom_id',
+        'nis',
+        'nisn',
+        'gender',
+        'phone',
+        'address',
+        'photo',
+        'name',
+    ];
 
     public function user()
     {
@@ -35,4 +35,13 @@ protected $fillable = [
     {
         return $this->hasMany(Submission::class);
     }
+
+    public function attendances()
+    {
+
+        return $this->hasMany(
+            Attendance::class
+        );
+
+    } 
 }

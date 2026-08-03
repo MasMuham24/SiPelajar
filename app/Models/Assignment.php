@@ -16,14 +16,12 @@ class Assignment extends Model
         'description',
         'deadline',
         'attachment',
+        'is_active',
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'deadline' => 'datetime',
-        ];
-    }
+    protected $casts = [
+        'deadline' => 'datetime',
+    ];
 
     public function teacher()
     {
@@ -33,10 +31,5 @@ class Assignment extends Model
     public function classroom()
     {
         return $this->belongsTo(Classroom::class);
-    }
-
-    public function submissions()
-    {
-        return $this->hasMany(Submission::class);
     }
 }

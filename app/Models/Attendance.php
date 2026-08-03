@@ -2,36 +2,61 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Classroom;
+use App\Models\Teacher;
+use App\Models\Office;
 
 class Attendance extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
-        'user_id',
-        'attendance_date',
+        'student_id',
+        'teacher_id',
+        'classroom_id',
+        'date',
         'check_in',
         'check_out',
         'latitude',
         'longitude',
+        'distance',
         'status',
         'late_minutes',
         'note',
     ];
 
-    protected function casts(): array
+    protected $casts = [
+        'date' => 'datetime',
+    ];
+
+    public function student()
     {
-        return [
-            'attendance_date' => 'date',
-            'check_in' => 'datetime:H:i:s',
-            'check_out' => 'datetime:H:i:s',
-        ];
+
+        return $this->belongsTo(Student::class);
+
     }
 
-    public function user()
+    public function classroom()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(Classroom::class);
+    }
+
+    public function teacher()
+    {
+        return $this->belongsTo(Teacher::class);
+    }
+
+    public function office()
+    {
+        return $this->belongsTo(Office::class);
+    }
+
+    public function getCheckInAttribute($value)
+    {
+        return $value ? \Carbon\Carbon::parse($value) : null;
+    }
+
+    public function getCheckOutAttribute($value)
+    {
+        return $value ? \Carbon\Carbon::parse($value) : null;
     }
 }

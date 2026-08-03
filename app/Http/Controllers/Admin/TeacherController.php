@@ -20,7 +20,7 @@ class TeacherController extends Controller
     public function downloadTemplate()
     {
         $headers = ['name', 'nip', 'gender', 'phone', 'address'];
-        
+
         $callback = function () use ($headers) {
             $file = fopen('php://output', 'w');
             fputcsv($file, $headers);
@@ -45,9 +45,9 @@ class TeacherController extends Controller
         $file = $request->file('file');
         $path = $file->getRealPath();
         $extension = strtolower($file->getClientOriginalExtension());
-        
+
         $rows = [];
-        
+
         if ($extension === 'xlsx' || $extension === 'xls') {
             try {
                 $spreadsheet = IOFactory::load($path);
@@ -76,7 +76,7 @@ class TeacherController extends Controller
         }, $rows[0]);
 
         $expectedHeaders = ['name', 'nip', 'gender', 'phone', 'address'];
-        if (array_diff($expectedHeaders, $header) !== array_diff($header, $expectedHeaders)) {
+        if (array_diff($expectedHeaders, $header) !== array() || array_diff($header, $expectedHeaders) !== array()) {
             return redirect()->route('admin.teachers.index')->with('error', 'Format header tidak sesuai. Pastikan header adalah: ' . implode(', ', $expectedHeaders));
         }
 
@@ -88,7 +88,7 @@ class TeacherController extends Controller
         try {
             foreach (array_slice($rows, 1) as $row) {
                 $rowNum++;
-                
+
                 if (empty(array_filter($row))) {
                     continue;
                 }
@@ -118,19 +118,16 @@ class TeacherController extends Controller
                     continue;
                 }
 
-                if (Teacher::where('nip', $data['nip'])->exists()) {
+                if (Teacher::query()->where('nip', $data['nip'])->exists()) {
                     $errorRows[] = "Baris {$rowNum}: NIP '{$data['nip']}' sudah terdaftar.";
                     continue;
                 }
 
-                if (User::where('username', $data['nip'])->exists()) {
-                    $errorRows[] = "Baris {$rowNum}: Username '{$data['nip']}' sudah terdaftar.";
-                    continue;
-                }
+                $username = $this->generateUsername($data['name']);
 
                 $user = User::create([
                     'name' => $data['name'],
-                    'username' => $data['nip'],
+                    'username' => $username,
                     'password' => bcrypt('123456'),
                     'role' => 'guru',
                 ]);
@@ -198,11 +195,13 @@ class TeacherController extends Controller
         $data = $request->validated();
 
         try {
-            DB::transaction(function () use ($data, $request, &$teacher) {
+            DB::transaction(function () use ($data, $request) {
+                $username = $this->generateUsername($data['name']);
+
                 $user = User::create([
                     'name' => $data['name'],
-                    'username' => $data['nip'],
-                    'password' => bcrypt('123456'), // Default password
+                    'username' => $username,
+                    'password' => bcrypt('123456'),
                     'role' => 'guru',
                 ]);
 
@@ -211,16 +210,40 @@ class TeacherController extends Controller
                 if ($request->hasFile('photo')) {
                     $data['photo'] = $request->file('photo')->store('teachers', 'public');
                 }
-                $teacher = Teacher::create($data);
+                Teacher::create($data);
             });
 
             return redirect()->route('admin.teachers.index')->with('success', 'Data guru berhasil ditambahkan.');
         } catch (QueryException $e) {
             if ($e->errorInfo[1] == 1062) {
-                return redirect()->route('admin.teachers.create')->with('error', 'Gagal menambahkan guru. NIP atau username sudah digunakan.');
+                return redirect()->route('admin.teachers.create')->with('error', 'Gagal menambahkan guru. Username sudah digunakan.');
             }
             throw $e;
         }
+    }
+
+    protected function generateUsername(string $name, ?int $excludeUserId = null): string
+    {
+        $words = preg_split('/\s+/', trim($name));
+        $firstTwoWords = array_slice($words, 0, 2);
+        $username = strtolower(implode('', $firstTwoWords));
+
+        $counter = 1;
+        $originalUsername = $username;
+        $query = User::where('username', $username);
+        if ($excludeUserId) {
+            $query->where('id', '!=', $excludeUserId);
+        }
+        while ($query->exists()) {
+            $username = $originalUsername . $counter;
+            $counter++;
+            $query = User::where('username', $username);
+            if ($excludeUserId) {
+                $query->where('id', '!=', $excludeUserId);
+            }
+        }
+
+        return $username;
     }
 
     /**
@@ -258,16 +281,18 @@ class TeacherController extends Controller
 
                 $teacher->update($data);
 
+                $username = $this->generateUsername($data['name'], $teacher->user->id);
+
                 $teacher->user()->update([
                     'name' => $data['name'],
-                    'username' => $data['nip'],
+                    'username' => $username,
                 ]);
             });
 
             return redirect()->route('admin.teachers.index')->with('success', 'Data guru berhasil diperbarui.');
         } catch (QueryException $e) {
             if ($e->errorInfo[1] == 1062) {
-                return redirect()->route('admin.teachers.edit', $teacher)->with('error', 'Gagal memperbarui guru. NIP atau username sudah digunakan.');
+                return redirect()->route('admin.teachers.edit', $teacher)->with('error', 'Gagal memperbarui guru. Username sudah digunakan.');
             }
             throw $e;
         }
