@@ -19,7 +19,8 @@
                         <th class="p-4 font-semibold text-gray-600">Judul</th>
                         <th class="p-4 font-semibold text-gray-600">Guru</th>
                         <th class="p-4 font-semibold text-gray-600">Deadline</th>
-                        <th class="p-4 font-semibold text-gray-600">Status</th>
+                        <th class="p-4 font-semibold text-gray-600">Status Tugas</th>
+                        <th class="p-4 font-semibold text-gray-600">Status Jawaban</th>
                         <th class="p-4 font-semibold text-gray-600">Lampiran</th>
                         <th class="p-4 font-semibold text-gray-600 w-32">Aksi</th>
                     </tr>
@@ -38,6 +39,18 @@
                                 <span class="px-2 py-1 rounded text-xs font-semibold bg-red-100 text-red-700">Ditutup</span>
                             @endif
                         </td>
+                        <td class="p-4">
+                            @php
+                                $submission = $assignment->submissions()->where('student_id', auth()->user()->student->id)->first();
+                            @endphp
+                            @if (!$submission)
+                                <span class="px-2 py-1 rounded text-xs font-semibold bg-gray-100 text-gray-700">Belum Dikumpulkan</span>
+                            @elseif ($submission->score !== null)
+                                <span class="px-2 py-1 rounded text-xs font-semibold bg-green-100 text-green-700">Dinilai: {{ $submission->score }}</span>
+                            @else
+                                <span class="px-2 py-1 rounded text-xs font-semibold bg-yellow-100 text-yellow-700">Belum Dinilai</span>
+                            @endif
+                        </td>
                         <td class="p-4 text-gray-800">
                             @if ($assignment->attachment)
                                 <a href="{{ asset('storage/' . $assignment->attachment) }}" target="_blank" class="text-blue-600 hover:text-blue-800">Lihat</a>
@@ -51,7 +64,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="p-8 text-center text-gray-500">
+                        <td colspan="8" class="p-8 text-center text-gray-500">
                             <i class="fas fa-inbox text-4xl mb-2 block text-gray-300"></i>
                             <p>Belum ada tugas.</p>
                         </td>
@@ -68,12 +81,26 @@
                     <p class="font-medium text-gray-800 truncate">{{ $assignment->title }}</p>
                     <p class="text-xs text-gray-500">Guru: {{ $assignment->teacher->user->name ?? '-' }}</p>
                     <p class="text-xs text-gray-500">Deadline: {{ $assignment->deadline->format('d M Y H:i') }}</p>
-                    <div class="mt-1">
-                        @if ($assignment->is_active)
-                            <span class="px-2 py-0.5 rounded text-xs font-semibold bg-green-100 text-green-700">Aktif</span>
-                        @else
-                            <span class="px-2 py-0.5 rounded text-xs font-semibold bg-red-100 text-red-700">Ditutup</span>
-                        @endif
+                    <div class="mt-2 space-y-1">
+                        <div>
+                            @if ($assignment->is_active)
+                                <span class="px-2 py-0.5 rounded text-xs font-semibold bg-green-100 text-green-700">Aktif</span>
+                            @else
+                                <span class="px-2 py-0.5 rounded text-xs font-semibold bg-red-100 text-red-700">Ditutup</span>
+                            @endif
+                        </div>
+                        <div>
+                            @php
+                                $submission = $assignment->submissions()->where('student_id', auth()->user()->student->id)->first();
+                            @endphp
+                            @if (!$submission)
+                                <span class="px-2 py-0.5 rounded text-xs font-semibold bg-gray-100 text-gray-700">Belum Dikumpulkan</span>
+                            @elseif ($submission->score !== null)
+                                <span class="px-2 py-0.5 rounded text-xs font-semibold bg-green-100 text-green-700">Dinilai: {{ $submission->score }}</span>
+                            @else
+                                <span class="px-2 py-0.5 rounded text-xs font-semibold bg-yellow-100 text-yellow-700">Belum Dinilai</span>
+                            @endif
+                        </div>
                     </div>
                 </div>
                 <a href="{{ route('siswa.assignments.show', $assignment) }}" class="text-blue-500 hover:text-blue-700 transition text-lg shrink-0" title="Lihat"><i class="fas fa-eye"></i></a>

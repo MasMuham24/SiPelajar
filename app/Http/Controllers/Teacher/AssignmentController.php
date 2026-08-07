@@ -12,6 +12,15 @@ use Illuminate\Support\Facades\Storage;
 
 class AssignmentController extends Controller
 {
+    private function ensureOwnership(Assignment $assignment): void
+    {
+        $teacherId = Teacher::where('user_id', Auth::id())->value('id');
+
+        if (! $teacherId || $assignment->teacher_id !== $teacherId) {
+            abort(403, 'Anda tidak memiliki akses ke tugas ini.');
+        }
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -49,6 +58,8 @@ class AssignmentController extends Controller
      */
     public function show(Assignment $assignment)
     {
+        $this->ensureOwnership($assignment);
+
         return view('teacher.assignments.show', compact('assignment'));
     }
 
@@ -57,6 +68,8 @@ class AssignmentController extends Controller
      */
     public function edit(Assignment $assignment)
     {
+        $this->ensureOwnership($assignment);
+
         $classrooms = Classroom::all();
         return view('teacher.assignments.edit', compact('assignment', 'classrooms'));
     }
@@ -66,6 +79,8 @@ class AssignmentController extends Controller
      */
     public function update(AssignmentRequest $request, Assignment $assignment)
     {
+        $this->ensureOwnership($assignment);
+
         $data = $request->validated();
         if ($request->hasFile('attachment')) {
             if ($assignment->attachment) {
@@ -82,6 +97,8 @@ class AssignmentController extends Controller
      */
     public function destroy(Assignment $assignment)
     {
+        $this->ensureOwnership($assignment);
+
         if ($assignment->attachment) {
             Storage::disk('public')->delete($assignment->attachment);
         }
@@ -92,6 +109,8 @@ class AssignmentController extends Controller
 
     public function end(Assignment $assignment)
     {
+        $this->ensureOwnership($assignment);
+
         $assignment->update(['is_active' => false]);
         return redirect()->route('guru.assignments.index')->with('success', 'Tugas telah diakhiri. Siswa tidak dapat lagi mengirim atau mengedit jawaban.');
     }

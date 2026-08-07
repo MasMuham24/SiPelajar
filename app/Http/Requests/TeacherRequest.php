@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class TeacherRequest extends FormRequest
@@ -17,7 +18,7 @@ class TeacherRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
@@ -25,11 +26,12 @@ class TeacherRequest extends FormRequest
 
         return [
             'name' => 'required|string|max:255',
-            'nip' => 'required|string|max:50|unique:teachers,nip,' . ($teacher ? $teacher->id : 'NULL'),
+            'nip' => 'required|string|max:50|unique:teachers,nip,'.($teacher ? $teacher->id : 'NULL'),
             'gender' => 'required|in:Laki-laki,Perempuan',
             'phone' => 'nullable|string|max:20',
             'address' => 'nullable|string',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'classroom_id' => 'nullable|exists:classrooms,id',
         ];
     }
 }

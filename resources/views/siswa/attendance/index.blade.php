@@ -91,7 +91,7 @@
             </button>
         </div>
         @if (!$checkoutEnabled && $now->lt($checkoutMin))
-            <p class="text-xs text-yellow-600 mt-2">
+            <p class="text-xs text-yellow-600 mt-2" id="checkoutTimer">
                 <i class="fas fa-clock mr-1"></i>
                 Checkout baru bisa dilakukan setelah pukul 15:30. Sekarang pukul {{ $now->format('H:i') }}.
             </p>
@@ -106,6 +106,34 @@
         </div>
     @endif
 </div>
+
+<script>
+function updateButtons() {
+    const now = new Date();
+    const currentHour = now.getHours();
+    const currentMinute = now.getMinutes();
+    const checkoutHour = 15;
+    const checkoutMinute = 30;
+    const isCheckoutTime = (currentHour > checkoutHour) || (currentHour === checkoutHour && currentMinute >= checkoutMinute);
+
+    const checkoutBtn = document.getElementById('checkoutBtn');
+    const checkoutTimer = document.getElementById('checkoutTimer');
+
+    if (checkoutBtn && isCheckoutTime) {
+        checkoutBtn.disabled = false;
+        checkoutBtn.classList.remove('bg-gray-400', 'cursor-not-allowed');
+        checkoutBtn.classList.add('bg-green-600', 'hover:bg-green-700');
+        checkoutBtn.innerHTML = '<i class="fas fa-sign-out-alt mr-2"></i> Absen Pulang';
+    }
+
+    if (checkoutTimer && isCheckoutTime) {
+        checkoutTimer.remove();
+    }
+}
+
+setInterval(updateButtons, 30000);
+updateButtons();
+</script>
 
 <div class="bg-white rounded-lg shadow overflow-x-auto">
     <table class="min-w-full divide-y divide-gray-200">
@@ -128,8 +156,14 @@
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">{{ $attendance->check_out ? $attendance->check_out->format('H:i') : '-' }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-center">
                         @php
-                            $badgeColor = match($attendance->status) {
-                                'Hadir' => 'bg-green-100 text-green-800',
+                            $statusLabel = match($attendance->status) {
+                                'izin', 'Izin' => 'Izin',
+                                'sakit', 'Sakit' => 'Sakit',
+                                'alpha', 'alfa', 'Alfa' => 'Alfa',
+                                default => $attendance->late_minutes > 0 ? 'Terlambat' : 'Tepat Waktu',
+                            };
+                            $badgeColor = match($statusLabel) {
+                                'Tepat Waktu' => 'bg-green-100 text-green-800',
                                 'Terlambat' => 'bg-yellow-100 text-yellow-800',
                                 'Izin' => 'bg-blue-100 text-blue-800',
                                 'Sakit' => 'bg-orange-100 text-orange-800',
@@ -137,7 +171,7 @@
                                 default => 'bg-gray-100 text-gray-800',
                             };
                         @endphp
-                        <span class="px-2 py-1 text-xs rounded-full {{ $badgeColor }}">{{ $attendance->status }}</span>
+                        <span class="px-2 py-1 text-xs rounded-full {{ $badgeColor }}">{{ $statusLabel }}</span>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
                         {{ $attendance->late_minutes > 0 ? $attendance->late_minutes . ' menit' : '-' }}

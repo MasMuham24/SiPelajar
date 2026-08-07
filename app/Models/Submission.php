@@ -15,14 +15,18 @@ class Submission extends Model
         'file',
         'link',
         'submitted_at',
+
         'score',
         'feedback',
+        'graded_by',
+        'graded_at',
     ];
 
     protected function casts(): array
     {
         return [
             'submitted_at' => 'datetime',
+            'graded_at' => 'datetime',
         ];
     }
 
@@ -34,5 +38,10 @@ class Submission extends Model
     public function student()
     {
         return $this->belongsTo(Student::class);
+    }
+
+    public function grader()
+    {
+        return $this->belongsTo(User::class, 'graded_by');
     }
 }

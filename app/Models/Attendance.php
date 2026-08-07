@@ -22,10 +22,15 @@ class Attendance extends Model
         'status',
         'late_minutes',
         'note',
+
+        'verified_by',
+        'verified_at',
+        'teacher_note',
     ];
 
     protected $casts = [
         'date' => 'datetime',
+        'verified_at' => 'datetime',
     ];
 
     public function student()
@@ -58,5 +63,10 @@ class Attendance extends Model
     public function getCheckOutAttribute($value)
     {
         return $value ? \Carbon\Carbon::parse($value) : null;
+    }
+
+    public function verifier()
+    {
+        return $this->belongsTo(User::class, 'verified_by');
     }
 }

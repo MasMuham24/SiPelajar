@@ -4,9 +4,7 @@ namespace App\Http\Controllers\Teacher;
 
 use App\Http\Controllers\Controller;
 use App\Models\Attendance;
-use App\Models\Classroom;
 use App\Models\Office;
-use App\Models\Student;
 use App\Models\Teacher;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -16,7 +14,7 @@ class AttendanceController extends Controller
     public function index()
     {
         $teacher = Auth::user();
-        $attendances = Attendance::with(['student','classroom',])->whereDate('date', today())->latest()->paginate(10);
+        $attendances = Attendance::with(['student', 'classroom'])->whereNotNull('student_id')->whereDate('date', today())->latest()->paginate(10);
         return view('teacher.attendance.index', compact('attendances'));
     }
 
@@ -132,60 +130,16 @@ class AttendanceController extends Controller
         return redirect()->route('guru.attendance.index')->with('success', 'Absensi pulang berhasil.');
     }
 
-    public function create(Request $request)
-    {
-        $classrooms = Classroom::with('students.user')->get();
-        $selectedClassroom = $request->query('kelas');
-        $selectedDate = $request->query('date', now()->format('Y-m-d'));
-
-        $students = collect();
-        foreach ($classrooms as $classroom) {
-            foreach ($classroom->students as $student) {
-                if ($selectedClassroom && (string) $selectedClassroom !== (string) $classroom->id) {
-                    continue;
-                }
-                $students->push((object) [
-                    'id' => $student->id,
-                    'nis' => $student->nis,
-                    'name' => $student->name ?: ($student->user->name ?? null),
-                    'classroom_id' => $classroom->id,
-                    'classroom_name' => $classroom->name,
-                ]);
-            }
-        }
-
-        return view('teacher.attendance.create', compact('classrooms', 'students', 'selectedClassroom', 'selectedDate'));
-    }
-
-    public function store(Request $request)
-    {
-
-        $request->validate([
-            'date' => ['required', 'date',],
-            'attendance' => ['required', 'array',],
-        ]);
-
-        foreach ($request->attendance as $studentId => $status) {
-            $student = Student::find($studentId);
-            if (!$student) {
-                continue;
-            }
-            Attendance::updateOrCreate(
-                ['student_id' => $studentId, 'date' => $request->date,],
-                ['classroom_id' => $student->classroom_id, 'status' => $status,]
-            );
-        }
-
-        return redirect()->route('attendance.index')->with('success','Absensi berhasil disimpan');
-
-    }
-
     public function history()
     {
+        $teacher = Teacher::where('user_id', Auth::id())->first();
 
-        $attendances = Attendance::with(['student','classroom',])->latest()->paginate(15);
+        $attendances = Attendance::with(['teacher', 'classroom'])
+            ->whereNotNull('teacher_id')
+            ->where('teacher_id', $teacher?->id)
+            ->latest()
+            ->paginate(15);
         return view('teacher.attendance.history', compact('attendances'));
-
     }
 
     private function calculateDistance(float $lat1, float $lon1, float $lat2, float $lon2): float

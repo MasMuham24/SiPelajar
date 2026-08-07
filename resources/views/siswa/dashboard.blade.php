@@ -18,7 +18,7 @@
 
         <div class="bg-white rounded-lg shadow-md p-6">
             <h2 class="text-gray-700 font-semibold mb-3">Absensi Hari Ini</h2>
-            <p class="text-3xl font-bold text-blue-600">{{ $todayAttendance }}</p>
+            <p class="text-3xl font-bold {{ $todayStatus === 'Terlambat' ? 'text-yellow-600' : 'text-blue-600' }}">{{ $todayStatus }}</p>
         </div>
 
         <div class="bg-white rounded-lg shadow-md p-6">

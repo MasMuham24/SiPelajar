@@ -34,8 +34,14 @@
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">{{ $attendance->check_out ? $attendance->check_out->format('H:i') : '-' }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-center">
                         @php
-                            $badgeColor = match($attendance->status) {
-                                'Hadir' => 'bg-green-100 text-green-800',
+                            $statusLabel = match($attendance->status) {
+                                'izin', 'Izin' => 'Izin',
+                                'sakit', 'Sakit' => 'Sakit',
+                                'alpha', 'alfa', 'Alfa' => 'Alfa',
+                                default => $attendance->late_minutes > 0 ? 'Terlambat' : 'Tepat Waktu',
+                            };
+                            $badgeColor = match($statusLabel) {
+                                'Tepat Waktu' => 'bg-green-100 text-green-800',
                                 'Terlambat' => 'bg-yellow-100 text-yellow-800',
                                 'Izin' => 'bg-blue-100 text-blue-800',
                                 'Sakit' => 'bg-orange-100 text-orange-800',
@@ -43,7 +49,7 @@
                                 default => 'bg-gray-100 text-gray-800',
                             };
                         @endphp
-                        <span class="px-2 py-1 text-xs rounded-full {{ $badgeColor }}">{{ $attendance->status }}</span>
+                        <span class="px-2 py-1 text-xs rounded-full {{ $badgeColor }}">{{ $statusLabel }}</span>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
                         {{ $attendance->late_minutes > 0 ? $attendance->late_minutes . ' menit' : '-' }}

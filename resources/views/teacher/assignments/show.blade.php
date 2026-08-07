@@ -43,6 +43,9 @@
     </div>
 
     <div class="flex justify-end gap-2">
+        <a href="{{ route('guru.assignments.submissions.index', $assignment) }}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition">
+            <i class="fas fa-clipboard-list mr-2"></i> Submission Siswa
+        </a>
         <a href="{{ route('guru.assignments.edit', $assignment) }}" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-md transition">Edit Tugas</a>
         <a href="{{ route('guru.assignments.index') }}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-md transition">Kembali</a>
     </div>

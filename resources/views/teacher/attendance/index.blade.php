@@ -12,9 +12,6 @@
         <a href="{{ route('guru.attendance.history') }}" class="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
             <i class="fas fa-history mr-2"></i> Riwayat
         </a>
-        <a href="{{ route('guru.attendance.create') }}" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-            <i class="fas fa-clipboard-check mr-2"></i> Isi Absensi
-        </a>
     </div>
 </div>
 
@@ -56,7 +53,7 @@
             </button>
         </div>
         @if (!$teacherCheckoutEnabled && $now->lt($teacherCheckoutMin))
-            <p class="text-xs text-yellow-600 mt-2">
+            <p class="text-xs text-yellow-600 mt-2" id="teacherCheckoutTimer">
                 <i class="fas fa-clock mr-1"></i>
                 Checkout baru bisa dilakukan setelah pukul 16:00. Sekarang pukul {{ $now->format('H:i') }}.
             </p>
@@ -72,6 +69,34 @@
     @endif
 </div>
 @endif
+
+<script>
+function updateTeacherCheckoutButton() {
+    const now = new Date();
+    const currentHour = now.getHours();
+    const currentMinute = now.getMinutes();
+    const checkoutHour = 16;
+    const checkoutMinute = 0;
+    const isCheckoutTime = (currentHour > checkoutHour) || (currentHour === checkoutHour && currentMinute >= checkoutMinute);
+
+    const checkoutBtn = document.getElementById('teacherCheckoutBtn');
+    const checkoutTimer = document.getElementById('teacherCheckoutTimer');
+
+    if (checkoutBtn && isCheckoutTime) {
+        checkoutBtn.disabled = false;
+        checkoutBtn.classList.remove('bg-gray-400', 'cursor-not-allowed');
+        checkoutBtn.classList.add('bg-green-600', 'hover:bg-green-700');
+        checkoutBtn.innerHTML = '<i class="fas fa-sign-out-alt mr-2"></i> Absen Pulang';
+    }
+
+    if (checkoutTimer && isCheckoutTime) {
+        checkoutTimer.remove();
+    }
+}
+
+setInterval(updateTeacherCheckoutButton, 30000);
+updateTeacherCheckoutButton();
+</script>
 
 @php
     $badgeColor = function($status) {
@@ -121,9 +146,6 @@
                     <td colspan="8" class="px-6 py-10 text-center text-gray-500">
                         <i class="fas fa-clipboard-list text-3xl mb-3 text-gray-300"></i>
                         <p>Belum ada data absensi hari ini.</p>
-                        <a href="{{ route('guru.attendance.create') }}" class="inline-block mt-3 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-                            Isi Absensi Sekarang
-                        </a>
                     </td>
                 </tr>
             @endforelse

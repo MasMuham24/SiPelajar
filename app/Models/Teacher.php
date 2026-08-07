@@ -16,6 +16,7 @@ class Teacher extends Model
         'phone',
         'address',
         'photo',
+        'classroom_id',
     ];
 
     public function user()
@@ -26,5 +27,18 @@ class Teacher extends Model
     public function assignments()
     {
         return $this->hasMany(Assignment::class);
+    }
+
+    public function classroom()
+    {
+        return $this->belongsTo(Classroom::class);
+    }
+
+    public function verifiedAttendances()
+    {
+        return $this->hasMany(
+            Attendance::class,
+            'verified_by'
+        );
     }
 }

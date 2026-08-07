@@ -87,7 +87,7 @@
                     @endif
                 </div>
 
-                @if ($assignment->is_active)
+                @if ($assignment->is_active && $submission->score === null)
                     <button onclick="document.getElementById('editForm').style.display = 'block'" class="w-full bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-md transition">
                         <i class="fas fa-edit mr-2"></i>Edit Jawaban
                     </button>
@@ -111,6 +111,11 @@
                                 <button type="button" onclick="document.getElementById('editForm').style.display = 'none'" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 px-3 py-2 rounded text-sm transition">Batal</button>
                             </div>
                         </form>
+                    </div>
+                @elseif ($submission->score !== null)
+                    <div class="bg-green-50 border border-green-200 rounded-md p-4">
+                        <p class="text-sm text-green-700"><i class="fas fa-check-circle mr-2"></i>Jawaban sudah dinilai</p>
+                        <p class="text-xs text-green-600 mt-1">Anda tidak dapat lagi mengedit jawaban setelah dinilai.</p>
                     </div>
                 @endif
             @else
