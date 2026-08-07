@@ -52,8 +52,8 @@
             <a href="{{ route('guru.assignments.index') }}" class="block px-4 py-3 rounded-lg transition {{ request()->routeIs('guru.assignments.*') ? 'bg-blue-700' : 'hover:bg-blue-800' }}">
                 <i class="fas fa-tasks mr-3"></i> Tugas
             </a>
-            <a href="#" class="block px-4 py-3 rounded-lg hover:bg-blue-800 transition">
-                <i class="fas fa-users mr-3"></i> Siswa
+            <a href="{{ route('guru.grades.index') }}" class="block px-4 py-3 rounded-lg transition {{ request()->routeIs('guru.grades.*') ? 'bg-blue-700' : 'hover:bg-blue-800' }}">
+                <i class="fas fa-chart-bar mr-3"></i> Rekap Nilai
             </a>
             <div x-data="{ open: false }" class="relative">
                 <button @click="open = !open" class="w-full flex items-center justify-between px-4 py-3 rounded-lg transition hover:bg-blue-800">

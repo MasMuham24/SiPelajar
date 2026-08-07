@@ -5,305 +5,113 @@
   <img src="https://img.shields.io/badge/PHP-8.2+-777BB4?style=for-the-badge&logo=php&logoColor=white">
   <img src="https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white">
   <img src="https://img.shields.io/badge/Bootstrap-5-7952B3?style=for-the-badge&logo=bootstrap&logoColor=white">
-  <img src="https://img.shields.io/badge/Status-Active-success?style=for-the-badge">
+  <img src="https://img.shields.io/badge/Status-Version_1.0-success?style=for-the-badge">
 </p>
 
 <p align="center">
-A modern <strong>School Management System</strong> built with <strong>Laravel 12</strong> that helps schools manage teachers, students, classrooms, attendance, and assignments through a secure role-based access system.
+  A comprehensive <strong>School Management System</strong> built with <strong>Laravel 12</strong>, designed to streamline academic administration through secure, role-based access control.
 </p>
 
 ---
 
 # 📖 Overview
 
-**SiPelajar** is a web-based School Management System designed to simplify academic administration. It provides separate dashboards and permissions for **Administrators**, **Teachers**, and **Students**, making school management more organized and efficient.
-
-The application includes attendance management, assignment management, user management, and classroom administration in one integrated platform.
+**SiPelajar** is an integrated web-based platform designed to optimize school operational efficiency. It provides tailored dashboards and specialized modules for **Administrators**, **Teachers**, **Students**, and **Homeroom Teachers (Wali Kelas)**, fostering a more organized and data-driven educational environment.
 
 ---
 
-# ✨ Features
+# ✨ Core Features
 
-## 🔐 Authentication
+## 🔐 Authentication & Security
+- Secure Multi-role Authentication & Authorization.
+- Role-based Access Control (RBAC).
+- Comprehensive Form Validation & CSRF Protection.
 
-- Multi-role Authentication
-- Manual Login System
-- Role-Based Authorization
-- Secure Password Authentication
-- Profile Management
+## 👨‍💼 Administrator
+- **Management Modules**: Comprehensive CRUD operations for School Locations, Majors, Classrooms, Teachers, Students, and User Accounts.
+- **Data Utility**: Bulk actions for classroom management and robust Excel-based data import capabilities.
 
----
+## 👨‍🏫 Teacher
+- **Assignment Management**: Full CRUD lifecycle for assignments with file attachment support.
+- **Submission & Grading**: Real-time monitoring of student submissions and integrated grading/feedback system.
+- **Attendance**: Streamlined tracking of personal and classroom attendance.
+- **Academic Analytics**: Dedicated Grade Recap module with custom filtering for data-driven assessment.
 
-## 👨‍💼 Admin Features
+## 👨‍🎓 Student
+- **Assignment Workflow**: View, submit, and update assignments with status tracking (Dynamic submission disabling after grading).
+- **Academic Tracking**: View attendance records and real-time latest assessment scores.
 
-- Dashboard
-- Manage School Locations
-- Manage Majors
-- Manage Classrooms
-- Manage Teachers
-- Manage Students
-- Manage User Accounts
-- System Management
-
----
-
-## 👨‍🏫 Teacher Features
-
-- Dashboard
-- Student Attendance
-- Create Assignments
-- Edit Assignments
-- Delete Assignments
-- Upload Assignment Attachments
-- View Student Submissions
-- Assignment Status Management
-
----
-
-## 👨‍🎓 Student Features
-
-- Dashboard
-- School Attendance
-- View Assignments
-- Submit Assignments
-- Upload Assignment Files
-- View Submission Status
+## 🤝 Homeroom Teacher (Wali Kelas)
+- **Attendance Oversight**: Dedicated verification and reporting tools for classroom attendance.
 
 ---
 
 # 🛠 Tech Stack
 
-| Technology | Version |
+| Technology | Purpose |
 |------------|---------|
-| Laravel | 12 |
-| PHP | 8.2+ |
-| MySQL | Latest |
+| Laravel 12 | Backend Framework |
+| PHP 8.2+ | Language |
+| MySQL | Database |
 | Blade | Template Engine |
-| Bootstrap | 5 |
-| HTML5 | ✓ |
-| CSS3 | ✓ |
-| JavaScript | ES6 |
+| Bootstrap 5 | UI/UX |
 
 ---
 
-# 📂 Folder Structure
+# 🚀 Setup Instructions
 
-```
-app/
-bootstrap/
-config/
-database/
-public/
-resources/
-routes/
-storage/
-tests/
-```
-
----
-
-# 🚀 Installation
-
-## Clone Repository
-
-```bash
-git clone https://github.com/MasMuham24/SiPelajar.git
-```
-
-## Go to Project
-
-```bash
-cd SiPelajar
-```
-
-## Install Dependencies
-
-```bash
-composer install
-```
-
-## Copy Environment File
-
-```bash
-cp .env.example .env
-```
-
-Windows
-
-```bash
-copy .env.example .env
-```
-
-## Generate Application Key
-
-```bash
-php artisan key:generate
-```
-
-## Configure Database
-
-Open `.env`
-
-```
-DB_DATABASE=your_database
-DB_USERNAME=root
-DB_PASSWORD=
-```
-
-## Run Migration & Seeder
-
-```bash
-php artisan migrate --seed
-```
-
-## Create Storage Link
-
-```bash
-php artisan storage:link
-```
-
-## Start Development Server
-
-```bash
-php artisan serve
-```
-
-Application URL
-
-```
-http://127.0.0.1:8000
-```
+1. **Clone the Repository**:
+   ```bash
+   git clone https://github.com/MasMuham24/SiPelajar.git
+   ```
+2. **Install Dependencies**:
+   ```bash
+   composer install
+   npm install
+   ```
+3. **Environment Setup**:
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   ```
+4. **Database Migration & Seeding**:
+   ```bash
+   php artisan migrate --seed
+   ```
+5. **Storage Setup**:
+   ```bash
+   php artisan storage:link
+   ```
+6. **Launch**:
+   ```bash
+   php artisan serve
+   ```
 
 ---
 
-# 👥 User Roles
-
-| Role | Description |
-|------|-------------|
-| Admin | Full Access |
-| Teacher | Manage Attendance & Assignments |
-| Student | Attendance & Assignment Submission |
-
----
-
-# 📋 Modules
-
-- Authentication
-- Dashboard
-- School Location Management
-- Major Management
-- Classroom Management
-- Teacher Management
-- Student Management
-- User Account Management
-- Attendance System
-- Assignment Management
-- Assignment Submission
-
----
-
-# 📈 Current Progress
+# 📈 Progress Status
 
 | Module | Status |
 |---------|--------|
-| Authentication | ✅ Completed |
-| Dashboard | ✅ Completed |
-| School Location CRUD | ✅ Completed |
-| Major CRUD | ✅ Completed |
-| Classroom CRUD | ✅ Completed |
-| Teacher CRUD | ✅ Completed |
-| Student CRUD | ✅ Completed |
-| User CRUD | ✅ Completed |
+| Authentication & RBAC | ✅ Completed |
+| Administration (CRUDs) | ✅ Completed |
+| Assignment & Submission | ✅ Completed |
 | Attendance System | ✅ Completed |
-| Assignment CRUD | ✅ Completed |
-| Assignment Submission | ✅ Completed |
+| Grade Recap & Analytics | ✅ Completed |
+| Homeroom Teacher Verification | ✅ Completed |
 
 ---
 
-# 📸 Screenshots
-
-Coming Soon
-
-```
-screenshots/
-│
-├── login.png
-├── admin-dashboard.png
-├── teacher-dashboard.png
-├── student-dashboard.png
-├── attendance.png
-├── assignments.png
-└── submissions.png
-```
-
----
-
-# 🔒 Security
-
-- CSRF Protection
-- Form Validation
-- Authentication Middleware
-- Role Middleware
-- Password Hashing
-- Secure File Upload
-
----
-
-# 📌 Future Improvements
-
-- Assignment Grading
-- Announcement Module
-- Notification System
-- Export PDF
-- Export Excel
-- Activity Log
-- Responsive Mobile Layout
-- Analytics Dashboard
-- Attendance Reports
-
----
-
-# 🤝 Contributing
-
-Contributions are welcome.
-
-1. Fork this repository
-2. Create your feature branch
-
-```bash
-git checkout -b feature/NewFeature
-```
-
-3. Commit your changes
-
-```bash
-git commit -m "Add new feature"
-```
-
-4. Push to the branch
-
-```bash
-git push origin feature/NewFeature
-```
-
-5. Open a Pull Request
+# 📌 Future Roadmap
+- PDF/Excel Export Capabilities.
+- Announcement & Notification System.
+- Activity Logs & Advanced Analytics Dashboard.
+- Responsive Mobile-first Layout Refinement.
 
 ---
 
 # 📄 License
-
 This project is licensed under the MIT License.
 
----
-
 # 👨‍💻 Author
-
-**Muhammad Syafi'i**
-
-- GitHub: https://github.com/MasMuham24
-
----
-
-<p align="center">
-Made with ❤️ using Laravel 12
-</p>
+**Muhammad Syafi'i** | [GitHub](https://github.com/MasMuham24)

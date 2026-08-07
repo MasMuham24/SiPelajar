@@ -3,16 +3,14 @@
 namespace App\Http\Controllers\Teacher;
 
 use App\Http\Controllers\Controller;
-use App\Models\Submission;
+use App\Http\Requests\GradeSubmissionRequest;
 use App\Models\Assignment;
+use App\Models\Submission;
 use App\Models\Teacher;
 use Illuminate\Support\Facades\Auth;
-use App\Http\Requests\GradeSubmissionRequest;
-use Illuminate\Http\Request;
 
 class SubmissionController extends Controller
 {
-
     private function ensureAssignmentOwnership(Assignment $assignment): void
     {
         $teacher = Teacher::query()->where('user_id', Auth::id())->first();
@@ -32,9 +30,9 @@ class SubmissionController extends Controller
         $this->ensureAssignmentOwnership($assignment);
 
         $submissions = Submission::with('student')->where('assignment_id', $assignment->id)->latest()->get();
+
         return view('teacher.submissions.index', compact('assignment', 'submissions'));
     }
-
 
     public function show(Submission $submission)
     {
@@ -42,17 +40,15 @@ class SubmissionController extends Controller
 
         $submission->load([
             'student',
-            'assignment'
+            'assignment',
         ]);
-
 
         return view('teacher.submissions.show', compact(
             'submission'
         ));
     }
 
-
-    public function update(GradeSubmissionRequest $request,Submission $submission)
+    public function update(GradeSubmissionRequest $request, Submission $submission)
     {
         $this->ensureSubmissionOwnership($submission);
 
@@ -63,7 +59,6 @@ class SubmissionController extends Controller
             'graded_at' => now(),
         ]);
 
-        return redirect()->back()->with('success','Nilai berhasil disimpan');
+        return redirect()->back()->with('success', 'Nilai berhasil disimpan');
     }
-
 }
