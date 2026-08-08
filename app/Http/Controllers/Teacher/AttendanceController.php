@@ -15,6 +15,7 @@ class AttendanceController extends Controller
     {
         $teacher = Auth::user();
         $attendances = Attendance::with(['student', 'classroom'])->whereNotNull('student_id')->whereDate('date', today())->latest()->paginate(10);
+
         return view('teacher.attendance.index', compact('attendances'));
     }
 
@@ -22,7 +23,7 @@ class AttendanceController extends Controller
     {
         $teacher = Teacher::where('user_id', Auth::id())->first();
 
-        if (!$teacher) {
+        if (! $teacher) {
             return redirect()->route('guru.attendance.index')
                 ->with('error', 'Data guru tidak ditemukan.');
         }
@@ -41,7 +42,7 @@ class AttendanceController extends Controller
 
         $office = Office::latest()->first();
 
-        if (!$office) {
+        if (! $office) {
             return redirect()->route('guru.attendance.index')
                 ->with('error', 'Lokasi sekolah belum dikonfigurasi oleh admin.');
         }
@@ -49,7 +50,7 @@ class AttendanceController extends Controller
         $latitude = $request->input('latitude');
         $longitude = $request->input('longitude');
 
-        if (!$latitude || !$longitude) {
+        if (! $latitude || ! $longitude) {
             return redirect()->route('guru.attendance.index')
                 ->with('error', 'Lokasi tidak ditemukan. Pastikan GPS aktif.');
         }
@@ -63,7 +64,7 @@ class AttendanceController extends Controller
 
         if ($distance > $office->radius) {
             return redirect()->route('guru.attendance.index')
-                ->with('error', 'Anda berada di luar area sekolah. Jarak: ' . round($distance) . 'm (batas: ' . $office->radius . 'm)');
+                ->with('error', 'Anda berada di luar area sekolah. Jarak: '.round($distance).'m (batas: '.$office->radius.'m)');
         }
 
         $now = now();
@@ -88,7 +89,7 @@ class AttendanceController extends Controller
         ]);
 
         $message = $status === 'terlambat'
-            ? 'Absensi masuk tercatat terlambat. Keterlambatan: ' . $lateMinutes . ' menit.'
+            ? 'Absensi masuk tercatat terlambat. Keterlambatan: '.$lateMinutes.' menit.'
             : 'Absensi masuk berhasil.';
 
         return redirect()->route('guru.attendance.index')->with('success', $message);
@@ -98,7 +99,7 @@ class AttendanceController extends Controller
     {
         $teacher = Teacher::where('user_id', Auth::id())->first();
 
-        if (!$teacher) {
+        if (! $teacher) {
             return redirect()->route('guru.attendance.index')
                 ->with('error', 'Data guru tidak ditemukan.');
         }
@@ -110,7 +111,7 @@ class AttendanceController extends Controller
             ->whereNull('check_out')
             ->first();
 
-        if (!$attendance) {
+        if (! $attendance) {
             return redirect()->route('guru.attendance.index')
                 ->with('error', 'Tidak ada absensi masuk hari ini atau sudah checkout.');
         }
@@ -139,6 +140,7 @@ class AttendanceController extends Controller
             ->where('teacher_id', $teacher?->id)
             ->latest()
             ->paginate(15);
+
         return view('teacher.attendance.history', compact('attendances'));
     }
 

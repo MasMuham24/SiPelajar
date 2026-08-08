@@ -32,6 +32,15 @@
             <a href="{{ route('guru.grades.index') }}" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-md transition">Reset</a>
         </div>
     </form>
+
+    <div class="mt-4 flex flex-wrap gap-2">
+        <a href="{{ route('guru.grades.export-pdf', request()->query()) }}" class="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md transition">
+            <i class="fas fa-file-pdf"></i> Export PDF
+        </a>
+        <a href="{{ route('guru.grades.export-excel', request()->query()) }}" class="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md transition">
+            <i class="fas fa-file-excel"></i> Export Excel
+        </a>
+    </div>
 </div>
 
 @if (empty($recaps))
