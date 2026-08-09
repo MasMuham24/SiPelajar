@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\WaliKelas\AttendanceRecapController;
 use App\Http\Controllers\WaliKelas\AttendanceVerificationController;
 use Illuminate\Support\Facades\Route;
 
@@ -8,4 +9,5 @@ Route::middleware(['auth', 'role:guru', 'wali-kelas'])->prefix('wali-kelas')->na
     Route::get('/attendance',[AttendanceVerificationController::class, 'index'])->name('attendance.index');
     Route::get('/attendance/{attendance}',[AttendanceVerificationController::class, 'show'])->name('attendance.show');
     Route::put('/attendance/{attendance}',[AttendanceVerificationController::class, 'update'])->name('attendance.update');
+    Route::get('/attendance/recap', [AttendanceRecapController::class, 'index'])->name('attendance.recap');
 });
