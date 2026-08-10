@@ -3,101 +3,320 @@
 @section('title', 'Edit Siswa')
 
 @section('content')
-<div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
-    <div>
-        <h2 class="text-xl sm:text-2xl font-bold text-gray-800">Edit Siswa</h2>
-        <p class="text-sm text-gray-500 mt-1">Perbarui data siswa.</p>
+
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+{{-- Header --}}
+<div class="mb-6">
+    <div class="flex items-center gap-3">
+
+        <a href="{{ route('admin.students.index') }}"
+           class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-600 transition"
+           title="Kembali">
+            ←
+        </a>
+
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800">
+                Edit Siswa
+            </h1>
+
+            <p class="text-sm text-gray-500 mt-1">
+                Perbarui informasi data siswa.
+            </p>
+        </div>
+
     </div>
-    <a href="{{ route('admin.students.index') }}" class="text-gray-600 hover:text-gray-800 transition flex items-center gap-2">
-        <i class="fas fa-arrow-left"></i> Kembali
-    </a>
 </div>
 
-<div class="bg-white rounded-lg shadow-md p-6 max-w-2xl">
-    <form action="{{ route('admin.students.update', $student) }}" method="POST" enctype="multipart/form-data">
+{{-- Card Form --}}
+<div class="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
+
+    {{-- Card Header --}}
+    <div class="px-6 py-5 border-b border-gray-100 bg-gray-50">
+
+        <h2 class="text-lg font-semibold text-gray-800">
+            Informasi Siswa
+        </h2>
+
+        <p class="text-sm text-gray-500 mt-1">
+            Periksa kembali data sebelum menyimpan perubahan.
+        </p>
+
+    </div>
+
+    {{-- Form --}}
+    <form
+        action="{{ route('admin.students.update', $student) }}"
+        method="POST"
+        enctype="multipart/form-data"
+        class="p-6"
+    >
+
         @csrf
         @method('PUT')
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+        {{-- Nama & Kelas --}}
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
+
             <div>
-                <label class="block text-gray-700 text-sm font-bold mb-2">Nama Siswa <span class="text-red-500">*</span></label>
-                <input type="text" name="name" value="{{ old('name', $student->name ?? $student->user->name) }}" class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-blue-500 @error('name') border-red-500 @enderror" required>
-                @error('name') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                <label class="block text-gray-700 text-sm font-semibold mb-2">
+                    Nama Siswa <span class="text-red-500">*</span>
+                </label>
+
+                <input
+                    type="text"
+                    name="name"
+                    value="{{ old('name', $student->name ?? $student->user->name) }}"
+                    class="w-full border border-gray-300 p-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('name') border-red-500 @enderror"
+                    placeholder="Masukkan nama siswa"
+                    required
+                >
+
+                @error('name')
+                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                @enderror
             </div>
 
             <div>
-                <label class="block text-gray-700 text-sm font-bold mb-2">Kelas <span class="text-red-500">*</span></label>
-                <select name="classroom_id" class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-blue-500 @error('classroom_id') border-red-500 @enderror" required>
+                <label class="block text-gray-700 text-sm font-semibold mb-2">
+                    Kelas <span class="text-red-500">*</span>
+                </label>
+
+                <select
+                    name="classroom_id"
+                    class="w-full border border-gray-300 p-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('classroom_id') border-red-500 @enderror"
+                    required
+                >
+
                     <option value="">-- Pilih Kelas --</option>
+
                     @foreach ($classrooms as $classroom)
-                        <option value="{{ $classroom->id }}" {{ old('classroom_id', $student->classroom_id) == $classroom->id ? 'selected' : '' }}>
-                            {{ $classroom->name }} {{ $classroom->grade }} - {{ $classroom->major->name ?? '-' }}
+
+                        <option
+                            value="{{ $classroom->id }}"
+                            {{ old('classroom_id', $student->classroom_id) == $classroom->id ? 'selected' : '' }}
+                        >
+                            {{ $classroom->name }} {{ $classroom->grade }} -
+                            {{ $classroom->major->name ?? '-' }}
                         </option>
+
                     @endforeach
+
                 </select>
-                @error('classroom_id') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+
+                @error('classroom_id')
+                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                @enderror
             </div>
+
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-            <div>
-                <label class="block text-gray-700 text-sm font-bold mb-2">NIS <span class="text-red-500">*</span></label>
-                <input type="text" name="nis" value="{{ old('nis', $student->nis) }}" class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-blue-500 @error('nis') border-red-500 @enderror" required>
-                @error('nis') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
-            </div>
+        {{-- NIS & NISN --}}
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
 
             <div>
-                <label class="block text-gray-700 text-sm font-bold mb-2">NISN <span class="text-red-500">*</span></label>
-                <input type="text" name="nisn" value="{{ old('nisn', $student->nisn) }}" class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-blue-500 @error('nisn') border-red-500 @enderror" required>
-                @error('nisn') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
-            </div>
-        </div>
-
-        <div class="mb-4">
-            <label class="block text-gray-700 text-sm font-bold mb-2">Jenis Kelamin <span class="text-red-500">*</span></label>
-            <div class="flex gap-4">
-                <label class="inline-flex items-center">
-                    <input type="radio" name="gender" value="Laki-laki" {{ old('gender', $student->gender) == 'Laki-laki' ? 'checked' : '' }} class="form-radio text-blue-600" required>
-                    <span class="ml-2">Laki-laki</span>
+                <label class="block text-gray-700 text-sm font-semibold mb-2">
+                    NIS <span class="text-red-500">*</span>
                 </label>
-                <label class="inline-flex items-center">
-                    <input type="radio" name="gender" value="Perempuan" {{ old('gender', $student->gender) == 'Perempuan' ? 'checked' : '' }} class="form-radio text-pink-600" required>
-                    <span class="ml-2">Perempuan</span>
-                </label>
+
+                <input
+                    type="text"
+                    name="nis"
+                    value="{{ old('nis', $student->nis) }}"
+                    class="w-full border border-gray-300 p-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('nis') border-red-500 @enderror"
+                    placeholder="Masukkan NIS"
+                    required
+                >
+
+                @error('nis')
+                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                @enderror
             </div>
-            @error('gender') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+
+            <div>
+                <label class="block text-gray-700 text-sm font-semibold mb-2">
+                    NISN <span class="text-red-500">*</span>
+                </label>
+
+                <input
+                    type="text"
+                    name="nisn"
+                    value="{{ old('nisn', $student->nisn) }}"
+                    class="w-full border border-gray-300 p-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('nisn') border-red-500 @enderror"
+                    placeholder="Masukkan NISN"
+                    required
+                >
+
+                @error('nisn')
+                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                @enderror
+            </div>
+
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+        {{-- Jenis Kelamin --}}
+        <div class="mb-5">
+
+            <label class="block text-gray-700 text-sm font-semibold mb-2">
+                Jenis Kelamin <span class="text-red-500">*</span>
+            </label>
+
+            <div class="flex flex-wrap gap-5">
+
+                <label class="inline-flex items-center cursor-pointer">
+
+                    <input
+                        type="radio"
+                        name="gender"
+                        value="Laki-laki"
+                        {{ old('gender', $student->gender) == 'Laki-laki' ? 'checked' : '' }}
+                        class="form-radio text-blue-600"
+                        required
+                    >
+
+                    <span class="ml-2 text-gray-700">
+                        Laki-laki
+                    </span>
+
+                </label>
+
+                <label class="inline-flex items-center cursor-pointer">
+
+                    <input
+                        type="radio"
+                        name="gender"
+                        value="Perempuan"
+                        {{ old('gender', $student->gender) == 'Perempuan' ? 'checked' : '' }}
+                        class="form-radio text-pink-600"
+                        required
+                    >
+
+                    <span class="ml-2 text-gray-700">
+                        Perempuan
+                    </span>
+
+                </label>
+
+            </div>
+
+            @error('gender')
+                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+            @enderror
+
+        </div>
+
+        {{-- Telepon & Foto --}}
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
+
             <div>
-                <label class="block text-gray-700 text-sm font-bold mb-2">No. Telepon</label>
-                <input type="text" name="phone" value="{{ old('phone', $student->phone) }}" class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-blue-500 @error('phone') border-red-500 @enderror">
-                @error('phone') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                <label class="block text-gray-700 text-sm font-semibold mb-2">
+                    No. Telepon
+                </label>
+
+                <input
+                    type="text"
+                    name="phone"
+                    value="{{ old('phone', $student->phone) }}"
+                    maxlength="20"
+                    inputmode="numeric"
+                    class="w-full border border-gray-300 p-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('phone') border-red-500 @enderror"
+                    placeholder="Contoh: 081234567890"
+                >
+
+                @error('phone')
+                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                @enderror
             </div>
 
             <div>
-                <label class="block text-gray-700 text-sm font-bold mb-2">Foto</label>
+
+                <label class="block text-gray-700 text-sm font-semibold mb-2">
+                    Foto
+                </label>
+
                 @if ($student->photo)
-                    <div class="flex items-center gap-3 mb-2">
-                        <img src="{{ asset('storage/' . $student->photo) }}" alt="Foto" class="w-12 h-12 rounded-full object-cover">
-                        <span class="text-xs text-gray-500">Kosongkan jika tidak ingin mengubah foto.</span>
+
+                    <div class="flex items-center gap-3 mb-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+
+                        <img
+                            src="{{ asset('storage/' . $student->photo) }}"
+                            alt="Foto {{ $student->name }}"
+                            class="w-14 h-14 rounded-full object-cover border-2 border-white shadow-sm"
+                        >
+
+                        <div>
+                            <p class="text-sm font-medium text-gray-700">
+                                Foto saat ini
+                            </p>
+
+                            <p class="text-xs text-gray-500">
+                                Kosongkan jika tidak ingin mengubah foto.
+                            </p>
+                        </div>
+
                     </div>
+
                 @endif
-                <input type="file" name="photo" accept="image/*" class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-blue-500 @error('photo') border-red-500 @enderror">
-                @error('photo') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+
+                <input
+                    type="file"
+                    name="photo"
+                    accept="image/*"
+                    class="w-full border border-gray-300 p-2 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('photo') border-red-500 @enderror"
+                >
+
+                @error('photo')
+                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                @enderror
+
             </div>
+
         </div>
 
+        {{-- Alamat --}}
         <div class="mb-6">
-            <label class="block text-gray-700 text-sm font-bold mb-2">Alamat</label>
-            <textarea name="address" rows="3" class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-blue-500 @error('address') border-red-500 @enderror">{{ old('address', $student->address) }}</textarea>
-            @error('address') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+
+            <label class="block text-gray-700 text-sm font-semibold mb-2">
+                Alamat
+            </label>
+
+            <textarea
+                name="address"
+                rows="4"
+                class="w-full border border-gray-300 p-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('address') border-red-500 @enderror"
+                placeholder="Masukkan alamat lengkap siswa"
+            >{{ old('address', $student->address) }}</textarea>
+
+            @error('address')
+                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+            @enderror
+
         </div>
 
-        <div class="flex justify-end gap-2">
-            <a href="{{ route('admin.students.index') }}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-md transition">Batal</a>
-            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition">Perbarui</button>
+        {{-- Action --}}
+        <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-5 border-t border-gray-100">
+
+            <a
+                href="{{ route('admin.students.index') }}"
+                class="inline-flex items-center justify-center px-5 py-2.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium transition"
+            >
+                ← Kembali
+            </a>
+
+            <button
+                type="submit"
+                class="inline-flex items-center justify-center px-5 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-sm transition"
+            >
+                Perbarui Siswa
+            </button>
+
         </div>
+
     </form>
+
 </div>
+```
+
+</div>
+
 @endsection

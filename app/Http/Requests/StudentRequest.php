@@ -48,7 +48,8 @@ class StudentRequest extends FormRequest
             ],
             'phone' => [
                 'nullable',
-                'numeric',
+                'string',
+                'regex:/^[0-9]+$/',
                 'max:20',
             ],
             'address' => [
