@@ -18,9 +18,17 @@ class DashboardController extends Controller
             ->whereDate('date', today())
             ->first();
 
-        $todayStatus = $todayAttendance
-            ? ($todayAttendance->late_minutes > 0 ? 'Terlambat' : 'Tepat Waktu')
-            : '-';
+        $todayStatus = '-';
+        if ($todayAttendance) {
+            $todayStatus = match ($todayAttendance->status) {
+                'terlambat', 'Terlambat' => 'Terlambat',
+                'izin', 'Izin' => 'Izin',
+                'sakit', 'Sakit' => 'Sakit',
+                'alpha', 'alfa', 'Alfa' => 'Alfa',
+                'hadir', 'Hadir' => ($todayAttendance->late_minutes > 0 ? 'Terlambat' : 'Tepat Waktu'),
+                default => ($todayAttendance->late_minutes > 0 ? 'Terlambat' : 'Tepat Waktu'),
+            };
+        }
 
         $lastGrade = \App\Models\Submission::where('student_id', $student?->id)->latest()->value('score') ?? 0;
 

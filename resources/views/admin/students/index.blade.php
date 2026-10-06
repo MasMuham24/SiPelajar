@@ -11,8 +11,11 @@
             <p class="text-sm text-gray-500 mt-1">Kelola data siswa yang terdaftar di sistem.</p>
         </div>
         <div class="flex flex-wrap gap-2">
-            <a href="{{ route('admin.students.template') }}" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-md transition flex items-center gap-2">
-                <i class="fas fa-file-excel"></i> Template CSV
+            <a href="{{ route('admin.students.template', ['format' => 'csv']) }}" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-md transition flex items-center gap-2">
+                <i class="fas fa-file-csv"></i> Template CSV
+            </a>
+            <a href="{{ route('admin.students.template', ['format' => 'xlsx']) }}" class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-md transition flex items-center gap-2">
+                <i class="fas fa-file-excel"></i> Template XLSX
             </a>
             <button @click="importModalOpen = true" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md transition flex items-center gap-2">
                 <i class="fas fa-file-import"></i> Import Siswa
@@ -160,9 +163,9 @@
 
     <!-- Import Modal -->
     <div x-show="importModalOpen" x-transition.opacity class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" style="display: none;">
-        <div @click.outside="importModalOpen = false" class="bg-white rounded-lg w-full max-w-md p-6 mx-4 shadow-xl" x-show="importModalOpen" x-transition>
+        <div @click.outside="importModalOpen = false" class="bg-white rounded-lg w-full max-w-lg p-6 mx-4 shadow-xl" x-show="importModalOpen" x-transition>
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-bold text-gray-800">Import Data Siswa (CSV)</h3>
+                <h3 class="text-xl font-bold text-gray-800">Import Data Siswa</h3>
                 <button @click="importModalOpen = false" class="text-gray-400 hover:text-gray-600">
                     <i class="fas fa-times"></i>
                 </button>
@@ -170,10 +173,24 @@
 
             <form action="{{ route('admin.students.import') }}" method="POST" enctype="multipart/form-data">
                 @csrf
+                <div class="mb-4 bg-gray-50 border border-gray-200 p-3 rounded-md text-xs text-gray-600 space-y-1">
+                    <p><strong>Format yang didukung:</strong> CSV / XLSX (.csv, .xlsx, .xls)</p>
+                    <p><strong>Kolom:</strong> Nama, NIS, NISN, Jurusan, Kelas, Gender, No. HP, Alamat</p>
+                    <div class="flex items-center gap-2 pt-2 border-t border-gray-200 mt-2">
+                        <span>Unduh template:</span>
+                        <a href="{{ route('admin.students.template', ['format' => 'csv']) }}" class="text-emerald-600 hover:underline inline-flex items-center gap-1 font-semibold">
+                            <i class="fas fa-download"></i> Template CSV
+                        </a>
+                        <span class="text-gray-300">|</span>
+                        <a href="{{ route('admin.students.template', ['format' => 'xlsx']) }}" class="text-teal-600 hover:underline inline-flex items-center gap-1 font-semibold">
+                            <i class="fas fa-download"></i> Template XLSX
+                        </a>
+                    </div>
+                </div>
+
                 <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2">Pilih File CSV</label>
-                    <input type="file" name="file" accept=".csv, .txt" class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-blue-500" required>
-                    <p class="text-xs text-gray-500 mt-1">Unduh template terlebih dahulu untuk memastikan format kolom sesuai.</p>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Pilih File</label>
+                    <input type="file" name="file" accept=".csv, .txt, .xlsx, .xls" class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-blue-500" required>
                 </div>
                 <div class="flex justify-end gap-2">
                     <button type="button" @click="importModalOpen = false" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-md transition">Batal</button>
@@ -206,7 +223,7 @@
                     Swal.fire({
                         icon: 'error',
                         title: 'Oops!',
-                        text: '{{ session('error') }}',
+                        html: {!! json_encode(session('error')) !!},
                     });
                 @endif
             },

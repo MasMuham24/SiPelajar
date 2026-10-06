@@ -18,6 +18,7 @@ Route::middleware(['auth', 'role:guru'])->prefix('guru')->as('guru.')->group(fun
     Route::get('/grades/export-pdf', [GradeRecapController::class, 'exportPdf'])->name('grades.export-pdf');
     Route::get('/grades/export-excel', [GradeRecapController::class, 'exportExcel'])->name('grades.export-excel');
     Route::get('/attendance', [AttendanceController::class, 'index'])->name('attendance.index');
+    Route::get('/attendance/data', [AttendanceController::class, 'data'])->name('attendance.data');
     Route::post('/attendance/checkin', [AttendanceController::class, 'checkin'])->name('attendance.checkin');
     Route::post('/attendance/checkout', [AttendanceController::class, 'checkout'])->name('attendance.checkout');
     Route::get('/attendance/history', [AttendanceController::class, 'history'])->name('attendance.history');

@@ -64,12 +64,12 @@ class AttendanceController extends Controller
         }
 
         $now = now();
-        $checkinLimit = now()->setTime(8, 0, 0);
+        $checkinLimit = $now->copy()->setTime(8, 0, 0);
         $lateMinutes = 0;
         $status = 'hadir';
 
         if ($now->gt($checkinLimit)) {
-            $lateMinutes = $now->diffInMinutes($checkinLimit);
+            $lateMinutes = (int) ceil($checkinLimit->diffInSeconds($now) / 60);
             $status = 'terlambat';
         }
 

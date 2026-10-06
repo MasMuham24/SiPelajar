@@ -11,12 +11,75 @@ use Illuminate\Support\Facades\Auth;
 
 class AttendanceController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $teacher = Auth::user();
-        $attendances = Attendance::with(['student', 'classroom'])->whereNotNull('student_id')->whereDate('date', today())->latest()->paginate(10);
+        if ($request->ajax() || $request->wantsJson()) {
+            return $this->data($request);
+        }
 
-        return view('teacher.attendance.index', compact('attendances'));
+        $date = $request->query('date', today()->toDateString());
+        $attendances = Attendance::with(['student.user', 'classroom'])
+            ->whereNotNull('student_id')
+            ->whereDate('date', $date)
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('teacher.attendance.index', compact('attendances', 'date'));
+    }
+
+    public function data(Request $request)
+    {
+        $date = $request->query('date', today()->toDateString());
+
+        $attendances = Attendance::with(['student.user', 'classroom'])
+            ->whereNotNull('student_id')
+            ->whereDate('date', $date)
+            ->latest()
+            ->paginate(10);
+
+        $items = collect($attendances->items())->map(function ($attendance, $index) use ($attendances) {
+            $studentName = $attendance->student?->user?->name ?? $attendance->student?->name ?? '-';
+            $classroomName = $attendance->classroom?->name ?? '-';
+            $dateFormatted = $attendance->date ? $attendance->date->format('d M Y') : '-';
+            $checkIn = $attendance->check_in ? $attendance->check_in->format('H:i') : '-';
+            $checkOut = $attendance->check_out ? $attendance->check_out->format('H:i') : '-';
+
+            $statusStr = ucfirst(strtolower($attendance->status ?? ''));
+            $badgeClass = match ($statusStr) {
+                'Hadir' => 'bg-green-100 text-green-800',
+                'Terlambat' => 'bg-yellow-100 text-yellow-800',
+                'Izin' => 'bg-blue-100 text-blue-800',
+                'Sakit' => 'bg-orange-100 text-orange-800',
+                'Alfa', 'Alpha' => 'bg-red-100 text-red-800',
+                default => 'bg-gray-100 text-gray-800',
+            };
+
+            $lateMinutes = (int) $attendance->late_minutes;
+            $lateText = $lateMinutes > 0 ? "{$lateMinutes} menit" : '-';
+
+            return [
+                'id' => $attendance->id,
+                'index' => $attendances->firstItem() ? ($attendances->firstItem() + $index) : ($index + 1),
+                'student_name' => $studentName,
+                'classroom_name' => $classroomName,
+                'date' => $dateFormatted,
+                'check_in' => $checkIn,
+                'check_out' => $checkOut,
+                'status' => $attendance->status,
+                'status_label' => $statusStr,
+                'badge_class' => $badgeClass,
+                'late_minutes' => $lateMinutes,
+                'late_text' => $lateText,
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'data' => $items,
+            'total' => $attendances->total(),
+            'date' => $date,
+        ]);
     }
 
     public function checkin(Request $request)
@@ -68,12 +131,12 @@ class AttendanceController extends Controller
         }
 
         $now = now();
-        $checkinLimit = now()->setTime(8, 0, 0);
+        $checkinLimit = $now->copy()->setTime(8, 0, 0);
         $lateMinutes = 0;
         $status = 'hadir';
 
         if ($now->gt($checkinLimit)) {
-            $lateMinutes = $now->diffInMinutes($checkinLimit);
+            $lateMinutes = (int) ceil($checkinLimit->diffInSeconds($now) / 60);
             $status = 'terlambat';
         }
 

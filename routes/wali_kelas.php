@@ -10,4 +10,6 @@ Route::middleware(['auth', 'role:guru', 'wali-kelas'])->prefix('wali-kelas')->na
     Route::get('/attendance/{attendance}',[AttendanceVerificationController::class, 'show'])->name('attendance.show');
     Route::put('/attendance/{attendance}',[AttendanceVerificationController::class, 'update'])->name('attendance.update');
     Route::get('/attendance/recap', [AttendanceRecapController::class, 'index'])->name('attendance.recap');
+    Route::get('/attendance/reacp/pdf', [AttendanceRecapController::class, 'pdf'])->name('attendance.recap.pdf');
+    Route::get('/attendance/reacap/excel', [AttendanceRecapController::class, 'excel'])->name('attendance.recap.excel');
 });

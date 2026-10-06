@@ -65,6 +65,11 @@ class Attendance extends Model
         return $value ? \Carbon\Carbon::parse($value) : null;
     }
 
+    public function getLateMinutesAttribute($value)
+    {
+        return abs((int) $value);
+    }
+
     public function verifier()
     {
         return $this->belongsTo(User::class, 'verified_by');

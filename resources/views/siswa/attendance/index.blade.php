@@ -17,7 +17,7 @@
 
     $hasCheckin = $todayAttendance && $todayAttendance->check_in;
     $hasCheckout = $todayAttendance && $todayAttendance->check_out;
-    $isLate = $todayAttendance && $todayAttendance->late_minutes > 0;
+    $isLate = $todayAttendance && ($todayAttendance->status === 'terlambat' || $todayAttendance->late_minutes > 0);
     $now = now();
     $checkoutMin = now()->setTime(15, 30, 0);
     $checkoutEnabled = $hasCheckin && !$hasCheckout && $now->gte($checkoutMin);
@@ -160,10 +160,12 @@ updateButtons();
                                 'izin', 'Izin' => 'Izin',
                                 'sakit', 'Sakit' => 'Sakit',
                                 'alpha', 'alfa', 'Alfa' => 'Alfa',
+                                'terlambat', 'Terlambat' => 'Terlambat',
+                                'hadir', 'Hadir' => ($attendance->late_minutes > 0 ? 'Terlambat' : 'Tepat Waktu'),
                                 default => $attendance->late_minutes > 0 ? 'Terlambat' : 'Tepat Waktu',
                             };
                             $badgeColor = match($statusLabel) {
-                                'Tepat Waktu' => 'bg-green-100 text-green-800',
+                                'Tepat Waktu', 'Hadir' => 'bg-green-100 text-green-800',
                                 'Terlambat' => 'bg-yellow-100 text-yellow-800',
                                 'Izin' => 'bg-blue-100 text-blue-800',
                                 'Sakit' => 'bg-orange-100 text-orange-800',
