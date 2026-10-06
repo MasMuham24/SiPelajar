@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Attendance;
+use App\Models\AttendanceSetting;
 use App\Models\Classroom;
 use App\Models\Major;
 use App\Models\Office;
@@ -56,6 +57,11 @@ class StudentAttendanceStatusTest extends TestCase
             'latitude' => -6.8951427,
             'longitude' => 110.6177293,
             'radius' => 500,
+        ]);
+
+        AttendanceSetting::updateOrCreate([], [
+            'school_start_time' => '08:00:00',
+            'school_end_time' => '15:30:00',
         ]);
     }
 

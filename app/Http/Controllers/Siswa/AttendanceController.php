@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Siswa;
 
 use App\Http\Controllers\Controller;
 use App\Models\Attendance;
+use App\Models\AttendanceSetting;
 use App\Models\Office;
-use App\Models\Student;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -38,7 +38,7 @@ class AttendanceController extends Controller
 
         $office = Office::latest()->first();
 
-        if (!$office) {
+        if (! $office) {
             return redirect()->route('siswa.attendance.index')
                 ->with('error', 'Lokasi sekolah belum dikonfigurasi oleh admin.');
         }
@@ -46,7 +46,7 @@ class AttendanceController extends Controller
         $latitude = $request->input('latitude');
         $longitude = $request->input('longitude');
 
-        if (!$latitude || !$longitude) {
+        if (! $latitude || ! $longitude) {
             return redirect()->route('siswa.attendance.index')
                 ->with('error', 'Lokasi tidak ditemukan. Pastikan GPS aktif.');
         }
@@ -60,11 +60,12 @@ class AttendanceController extends Controller
 
         if ($distance > $office->radius) {
             return redirect()->route('siswa.attendance.index')
-                ->with('error', 'Anda berada di luar area sekolah. Jarak: ' . round($distance) . 'm (batas: ' . $office->radius . 'm)');
+                ->with('error', 'Anda berada di luar area sekolah. Jarak: '.round($distance).'m (batas: '.$office->radius.'m)');
         }
 
         $now = now();
-        $checkinLimit = $now->copy()->setTime(8, 0, 0);
+        $setting = AttendanceSetting::getSettings();
+        $checkinLimit = $setting->getStartLimit($now);
         $lateMinutes = 0;
         $status = 'hadir';
 
@@ -86,7 +87,7 @@ class AttendanceController extends Controller
         ]);
 
         $message = $status === 'terlambat'
-            ? 'Absensi masuk tercatat terlambat. Keterlambatan: ' . $lateMinutes . ' menit.'
+            ? 'Absensi masuk tercatat terlambat. Keterlambatan: '.$lateMinutes.' menit.'
             : 'Absensi masuk berhasil.';
 
         return redirect()->route('siswa.attendance.index')->with('success', $message);
@@ -102,17 +103,18 @@ class AttendanceController extends Controller
             ->whereNull('check_out')
             ->first();
 
-        if (!$attendance) {
+        if (! $attendance) {
             return redirect()->route('siswa.attendance.index')
                 ->with('error', 'Tidak ada absensi masuk hari ini atau sudah checkout.');
         }
 
         $now = now();
-        $checkoutMin = now()->setTime(15, 30, 0);
+        $setting = AttendanceSetting::getSettings();
+        $checkoutMin = $setting->getEndLimit($now);
 
         if ($now->lt($checkoutMin)) {
             return redirect()->route('siswa.attendance.index')
-                ->with('error', 'Checkout baru bisa dilakukan setelah pukul 15:30.');
+                ->with('error', 'Checkout baru bisa dilakukan setelah pukul '.$setting->getFormattedEndTime().'.');
         }
 
         $attendance->update([

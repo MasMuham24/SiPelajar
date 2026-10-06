@@ -39,6 +39,10 @@
                class="block px-4 py-3 rounded-lg transition {{ request()->routeIs('admin.offices.*') ? 'bg-blue-700' : 'hover:bg-blue-800' }}">
                 <i class="fas fa-map-marker-alt mr-3"></i> Lokasi Sekolah
             </a>
+            <a href="{{ route('admin.attendance-settings.index') }}" 
+               class="block px-4 py-3 rounded-lg transition {{ request()->routeIs('admin.attendance-settings.*') ? 'bg-blue-700' : 'hover:bg-blue-800' }}">
+                <i class="fas fa-clock mr-3"></i> Jam Absensi
+            </a>
             <a href="#" class="block px-4 py-3 rounded-lg hover:bg-blue-800 transition">
                 <i class="fas fa-file-alt mr-3"></i> Laporan
             </a>

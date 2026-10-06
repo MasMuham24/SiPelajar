@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\AccountController;
 use App\Http\Controllers\Admin\ClassroomController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\MajorController;
+use App\Http\Controllers\Admin\AttendanceSettingController;
 use App\Http\Controllers\Admin\OfficeController;
 use App\Http\Controllers\Admin\StudentController;
 use App\Http\Controllers\Admin\TeacherController;
@@ -22,4 +23,6 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->as('admin.')->group(
     Route::resource('teachers', TeacherController::class);
     Route::resource('accounts', AccountController::class);
     Route::resource('offices', OfficeController::class)->except(['show']);
+    Route::get('attendance-settings', [AttendanceSettingController::class, 'index'])->name('attendance-settings.index');
+    Route::match(['put', 'post'], 'attendance-settings', [AttendanceSettingController::class, 'update'])->name('attendance-settings.update');
 });

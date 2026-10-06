@@ -24,8 +24,10 @@
     $hasTeacherCheckout = $todayTeacherAttendance && $todayTeacherAttendance->check_out;
     $teacherIsLate = $todayTeacherAttendance && ($todayTeacherAttendance->status === 'terlambat' || $todayTeacherAttendance->late_minutes > 0);
     $now = now();
-    $teacherCheckoutMin = now()->setTime(16, 0, 0);
+    $attendanceSetting = \App\Models\AttendanceSetting::getSettings();
+    $teacherCheckoutMin = $attendanceSetting->getEndLimit($now);
     $teacherCheckoutEnabled = $hasTeacherCheckin && !$hasTeacherCheckout && $now->gte($teacherCheckoutMin);
+    [$teacherCheckoutHour, $teacherCheckoutMinute] = array_pad(explode(':', $attendanceSetting->school_end_time ?? '15:00'), 2, 0);
 @endphp
 
 @if($teacher)
@@ -55,7 +57,7 @@
         @if (!$teacherCheckoutEnabled && $now->lt($teacherCheckoutMin))
             <p class="text-xs text-yellow-600 mt-2" id="teacherCheckoutTimer">
                 <i class="fas fa-clock mr-1"></i>
-                Checkout baru bisa dilakukan setelah pukul 16:00. Sekarang pukul {{ $now->format('H:i') }}.
+                Checkout baru bisa dilakukan setelah pukul {{ $attendanceSetting->getFormattedEndTime() }}. Sekarang pukul {{ $now->format('H:i') }}.
             </p>
         @endif
     @else
@@ -75,8 +77,8 @@ function updateTeacherCheckoutButton() {
     const now = new Date();
     const currentHour = now.getHours();
     const currentMinute = now.getMinutes();
-    const checkoutHour = 16;
-    const checkoutMinute = 0;
+    const checkoutHour = {{ (int) $teacherCheckoutHour }};
+    const checkoutMinute = {{ (int) $teacherCheckoutMinute }};
     const isCheckoutTime = (currentHour > checkoutHour) || (currentHour === checkoutHour && currentMinute >= checkoutMinute);
 
     const checkoutBtn = document.getElementById('teacherCheckoutBtn');

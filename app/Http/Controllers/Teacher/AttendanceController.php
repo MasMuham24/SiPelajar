@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Teacher;
 
 use App\Http\Controllers\Controller;
 use App\Models\Attendance;
+use App\Models\AttendanceSetting;
 use App\Models\Office;
 use App\Models\Teacher;
 use Illuminate\Http\Request;
@@ -131,7 +132,8 @@ class AttendanceController extends Controller
         }
 
         $now = now();
-        $checkinLimit = $now->copy()->setTime(8, 0, 0);
+        $setting = AttendanceSetting::getSettings();
+        $checkinLimit = $setting->getStartLimit($now);
         $lateMinutes = 0;
         $status = 'hadir';
 
@@ -180,11 +182,12 @@ class AttendanceController extends Controller
         }
 
         $now = now();
-        $checkoutMin = now()->setTime(16, 0, 0);
+        $setting = AttendanceSetting::getSettings();
+        $checkoutMin = $setting->getEndLimit($now);
 
         if ($now->lt($checkoutMin)) {
             return redirect()->route('guru.attendance.index')
-                ->with('error', 'Checkout baru bisa dilakukan setelah pukul 16:00.');
+                ->with('error', 'Checkout baru bisa dilakukan setelah pukul '.$setting->getFormattedEndTime().'.');
         }
 
         $attendance->update([

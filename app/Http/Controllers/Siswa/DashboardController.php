@@ -3,18 +3,22 @@
 namespace App\Http\Controllers\Siswa;
 
 use App\Http\Controllers\Controller;
+use App\Models\Assignment;
+use App\Models\Attendance;
+use App\Models\Submission;
+use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        $student = auth()->user()->student;
+        $student = Auth::user()?->student;
 
-        $myAssignments = \App\Models\Assignment::where('classroom_id', $student?->classroom_id)
+        $myAssignments = Assignment::where('classroom_id', $student?->classroom_id)
             ->where('is_active', true)
             ->count();
 
-        $todayAttendance = \App\Models\Attendance::where('student_id', $student?->id)
+        $todayAttendance = Attendance::where('student_id', $student?->id)
             ->whereDate('date', today())
             ->first();
 
@@ -30,7 +34,7 @@ class DashboardController extends Controller
             };
         }
 
-        $lastGrade = \App\Models\Submission::where('student_id', $student?->id)->latest()->value('score') ?? 0;
+        $lastGrade = Submission::where('student_id', $student?->id)->latest()->value('score') ?? 0;
 
         return view('siswa.dashboard', compact('myAssignments', 'todayAttendance', 'todayStatus', 'lastGrade'));
     }
