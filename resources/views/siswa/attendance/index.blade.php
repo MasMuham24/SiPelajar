@@ -107,6 +107,41 @@
             </button>
         </div>
     @endif
+
+    <div class="border-t border-gray-200 mt-6 pt-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm text-gray-600">Periksa Status GPS Perangkat Anda</p>
+                <p class="text-xs text-gray-400">Diagnostic lokasi untuk keperluan absensi</p>
+            </div>
+            <button id="locationCheckBtn" onclick="performLocationCheck()"
+                    class="px-6 py-3 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition">
+                <i class="fas fa-map-marker-alt mr-2"></i> Cek Lokasi
+            </button>
+        </div>
+
+        <div id="locationResult" class="mt-4 hidden">
+            <div id="locationError" class="hidden bg-red-50 border border-red-200 rounded-lg p-4">
+                <p id="errorMessage" class="text-sm text-red-700"></p>
+            </div>
+            <div id="locationSuccess" class="hidden bg-green-50 border border-green-200 rounded-lg p-4">
+                <div class="space-y-2">
+                    <div class="text-sm">
+                        <span class="text-gray-600">Latitude:</span>
+                        <span id="latitude" class="font-mono text-gray-800 ml-2"></span>
+                    </div>
+                    <div class="text-sm">
+                        <span class="text-gray-600">Longitude:</span>
+                        <span id="longitude" class="font-mono text-gray-800 ml-2"></span>
+                    </div>
+                    <div class="text-sm">
+                        <span class="text-gray-600">Akurasi:</span>
+                        <span id="accuracy" class="font-mono text-gray-800 ml-2"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -134,7 +169,78 @@ function updateButtons() {
 }
 
 setInterval(updateButtons, 30000);
-updateButtons();
+    updateButtons();
+
+function performLocationCheck() {
+    const locationCheckBtn = document.getElementById('locationCheckBtn');
+    const locationResult = document.getElementById('locationResult');
+    const locationError = document.getElementById('locationError');
+    const locationSuccess = document.getElementById('locationSuccess');
+    const errorMessage = document.getElementById('errorMessage');
+    const latitudeSpan = document.getElementById('latitude');
+    const longitudeSpan = document.getElementById('longitude');
+    const accuracySpan = document.getElementById('accuracy');
+
+    // Reset UI
+    locationResult.classList.add('hidden');
+    locationError.classList.add('hidden');
+    locationSuccess.classList.add('hidden');
+    errorMessage.textContent = '';
+    locationCheckBtn.disabled = true;
+    locationCheckBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-2"></i> Mendeteksi lokasi...';
+
+    if (!window.isSecureContext) {
+        errorMessage.textContent = 'Lokasi membutuhkan koneksi HTTPS.';
+        locationError.classList.remove('hidden');
+        locationResult.classList.remove('hidden');
+        locationCheckBtn.disabled = false;
+        locationCheckBtn.innerHTML = '<i class="fas fa-map-marker-alt mr-2"></i> Cek Lokasi';
+        return;
+    }
+
+    if (!navigator.geolocation) {
+        errorMessage.textContent = 'Browser Anda tidak mendukung GPS.';
+        locationError.classList.remove('hidden');
+        locationResult.classList.remove('hidden');
+        locationCheckBtn.disabled = false;
+        locationCheckBtn.innerHTML = '<i class="fas fa-map-marker-alt mr-2"></i> Cek Lokasi';
+        return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+        function(position) {
+            latitudeSpan.textContent = position.coords.latitude.toFixed(7); // ponytail: fixed precision to 7 decimal places for display, adjust as needed.
+            longitudeSpan.textContent = position.coords.longitude.toFixed(7); // ponytail: fixed precision to 7 decimal places for display, adjust as needed.
+            accuracySpan.textContent = `${position.coords.accuracy.toFixed(1)} meter`; // ponytail: fixed precision to 1 decimal place for display, adjust as needed.
+            locationSuccess.classList.remove('hidden');
+            locationResult.classList.remove('hidden');
+            locationCheckBtn.disabled = false;
+            locationCheckBtn.innerHTML = '<i class="fas fa-map-marker-alt mr-2"></i> Cek Lokasi';
+        },
+        function(error) {
+            let message = 'Tidak dapat mengakses lokasi.';
+            if (error.code === error.PERMISSION_DENIED) {
+                message = 'Izin lokasi ditolak.';
+            } else if (error.code === error.POSITION_UNAVAILABLE) {
+                message = 'Lokasi tidak tersedia.';
+            } else if (error.code === error.TIMEOUT) {
+                message = 'Pengambilan lokasi timeout. Coba lagi.';
+            }
+            errorMessage.textContent = message;
+            locationError.classList.remove('hidden');
+            locationResult.classList.remove('hidden');
+            locationCheckBtn.disabled = false;
+            locationCheckBtn.innerHTML = '<i class="fas fa-map-marker-alt mr-2"></i> Cek Lokasi';
+        },
+        {
+            enableHighAccuracy: true,
+            timeout: 15000,
+            maximumAge: 0
+        }
+    );
+}
+
+
 </script>
 
 <div class="bg-white rounded-lg shadow overflow-x-auto">

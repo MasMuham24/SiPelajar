@@ -57,4 +57,19 @@ class MajorController extends Controller
             ->route('admin.majors.index')
             ->with('success', 'Jurusan berhasil dihapus');
     }
+
+    public function bulkDestroy()
+    {
+        $rawIds = request()->input('ids', '');
+        $ids = is_array($rawIds) ? $rawIds : explode(',', (string) $rawIds);
+        $ids = array_filter(array_map('trim', $ids));
+        
+        if (empty($ids)) {
+            return redirect()->route('admin.majors.index')->with('error', 'Pilih minimal 1 jurusan untuk dihapus.');
+        }
+
+        Major::destroy($ids);
+
+        return redirect()->route('admin.majors.index')->with('success', 'Berhasil menghapus ' . count($ids) . ' jurusan.');
+    }
 }

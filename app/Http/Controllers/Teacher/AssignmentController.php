@@ -15,7 +15,6 @@ class AssignmentController extends Controller
     private function ensureOwnership(Assignment $assignment): void
     {
         $teacherId = Teacher::where('user_id', Auth::id())->value('id');
-
         if (! $teacherId || $assignment->teacher_id !== $teacherId) {
             abort(403, 'Anda tidak memiliki akses ke tugas ini.');
         }
@@ -59,7 +58,6 @@ class AssignmentController extends Controller
     public function show(Assignment $assignment)
     {
         $this->ensureOwnership($assignment);
-
         return view('teacher.assignments.show', compact('assignment'));
     }
 
@@ -69,7 +67,6 @@ class AssignmentController extends Controller
     public function edit(Assignment $assignment)
     {
         $this->ensureOwnership($assignment);
-
         $classrooms = Classroom::all();
         return view('teacher.assignments.edit', compact('assignment', 'classrooms'));
     }
@@ -80,7 +77,6 @@ class AssignmentController extends Controller
     public function update(AssignmentRequest $request, Assignment $assignment)
     {
         $this->ensureOwnership($assignment);
-
         $data = $request->validated();
         if ($request->hasFile('attachment')) {
             if ($assignment->attachment) {
@@ -98,19 +94,35 @@ class AssignmentController extends Controller
     public function destroy(Assignment $assignment)
     {
         $this->ensureOwnership($assignment);
-
         if ($assignment->attachment) {
             Storage::disk('public')->delete($assignment->attachment);
         }
-
         $assignment->delete();
         return redirect()->route('guru.assignments.index')->with('success', 'Tugas berhasil dihapus.');
+    }
+
+    public function bulkDestroy()
+    {
+        $rawIds = request()->input('ids', '');
+        $ids = is_array($rawIds) ? $rawIds : explode(',', (string) $rawIds);
+        $ids = array_filter(array_map('trim', $ids));
+        if (empty($ids)) {
+            return redirect()->route('guru.assignments.index')->with('error', 'Pilih minimal 1 tugas untuk dihapus.');
+        }
+        $teacherId = Teacher::where('user_id', Auth::id())->value('id');
+        $assignments = Assignment::whereIn('id', $ids)->where('teacher_id', $teacherId)->get();
+        foreach ($assignments as $assignment) {
+            if ($assignment->attachment) {
+                Storage::disk('public')->delete($assignment->attachment);
+            }
+            $assignment->delete();
+        }
+        return redirect()->route('guru.assignments.index')->with('success', 'Berhasil menghapus ' . $assignments->count() . ' tugas.');
     }
 
     public function end(Assignment $assignment)
     {
         $this->ensureOwnership($assignment);
-
         $assignment->update(['is_active' => false]);
         return redirect()->route('guru.assignments.index')->with('success', 'Tugas telah diakhiri. Siswa tidak dapat lagi mengirim atau mengedit jawaban.');
     }

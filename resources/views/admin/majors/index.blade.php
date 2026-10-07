@@ -13,6 +13,9 @@
         <button @click="openModal('add')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition flex items-center gap-2 w-full sm:w-auto justify-center">
             <i class="fas fa-plus"></i> Tambah Jurusan
         </button>
+        <button @click="bulkDelete()" x-show="selectedCount > 0" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md transition flex items-center gap-2 w-full sm:w-auto justify-center">
+            <i class="fas fa-trash"></i> Hapus (<span x-text="selectedCount"></span>)
+        </button>
     </div>
 
     <div class="bg-white rounded-lg shadow-md overflow-hidden">
@@ -22,6 +25,9 @@
             <table class="w-full text-left border-collapse">
                 <thead>
                     <tr class="bg-gray-50 border-b border-gray-200">
+                        <th class="p-4 font-semibold text-gray-600 w-12">
+                            <input type="checkbox" @change="toggleSelectAll($event)" class="w-4 h-4">
+                        </th>
                         <th class="p-4 font-semibold text-gray-600 w-16">No</th>
                         <th class="p-4 font-semibold text-gray-600">Nama Jurusan</th>
                         <th class="p-4 font-semibold text-gray-600 w-32">Kode</th>
@@ -31,6 +37,9 @@
                 <tbody>
                     @forelse ($majors as $major)
                         <tr class="border-b border-gray-100 hover:bg-gray-50">
+                            <td class="p-4">
+                                <input type="checkbox" class="major-checkbox w-4 h-4" value="{{ $major->id }}" @change="updateSelectCount()">
+                            </td>
                             <td class="p-4 text-gray-800">{{ $loop->iteration + ($majors->currentPage() - 1) * $majors->perPage() }}</td>
                             <td class="p-4 text-gray-800 font-medium">{{ $major->name }}</td>
                             <td class="p-4 text-gray-800">
@@ -47,7 +56,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="p-8 text-center text-gray-500">
+                            <td colspan="5" class="p-8 text-center text-gray-500">
                                 <i class="fas fa-inbox text-4xl mb-2 block text-gray-300"></i>
                                 <p>Belum ada data jurusan.</p>
                             </td>
@@ -135,9 +144,10 @@
             formAction: '{{ route('admin.majors.store') }}',
             methodField: 'POST',
             formData: { name: '', code: '' },
+            selectedCount: 0,
 
             init() {
-                @if (session('success'))
+                    @if (session('success'))
                     Swal.fire({
                         icon: 'success',
                         title: 'Berhasil!',
@@ -146,6 +156,57 @@
                         showConfirmButton: false
                     });
                 @endif
+                @if (session('error'))
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops!',
+                        text: '{{ session('error') }}',
+                    });
+                @endif
+            },
+
+            toggleSelectAll(event) {
+                const checkboxes = document.querySelectorAll('.major-checkbox');
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = event.target.checked;
+                });
+                this.updateSelectCount();
+            },
+
+            updateSelectCount() {
+                const checkboxes = document.querySelectorAll('.major-checkbox:checked');
+                this.selectedCount = checkboxes.length;
+            },
+
+            bulkDelete() {
+                const checkboxes = document.querySelectorAll('.major-checkbox:checked');
+                if (checkboxes.length === 0) {
+                    Swal.fire({ icon: 'warning', title: 'Pilih Jurusan', text: 'Pilih minimal 1 jurusan untuk dihapus.' });
+                    return;
+                }
+                Swal.fire({
+                    title: 'Hapus Jurusan?',
+                    text: `${checkboxes.length} jurusan akan dihapus permanen.`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Ya, hapus!',
+                    cancelButtonText: 'Batal',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const ids = Array.from(checkboxes).map(cb => cb.value);
+                        const form = document.createElement('form');
+                        form.method = 'POST';
+                        form.action = '{{ route('admin.majors.bulkDestroy') }}';
+                        let idsInput = '';
+                        ids.forEach((id) => { idsInput += `<input type="hidden" name="ids[]" value="${id}">`; });
+                        form.innerHTML = `@csrf ${idsInput}`;
+                        document.body.appendChild(form);
+                        form.submit();
+                    }
+                });
             },
 
             openModal(type, id = null, name = '', code = '') {

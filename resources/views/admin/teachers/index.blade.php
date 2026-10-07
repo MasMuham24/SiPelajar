@@ -23,6 +23,10 @@
                     class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition flex items-center gap-2">
                     <i class="fas fa-plus"></i> Tambah Guru
                 </a>
+                <button @click="bulkDelete()" x-show="selectedCount > 0"
+                    class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md transition flex items-center gap-2">
+                    <i class="fas fa-trash"></i> Hapus (<span x-text="selectedCount"></span>)
+                </button>
             </div>
         </div>
 
@@ -48,6 +52,9 @@
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="bg-gray-50 border-b border-gray-200">
+                            <th class="p-4 font-semibold text-gray-600 w-12">
+                                <input type="checkbox" @change="toggleSelectAll($event)" class="w-4 h-4">
+                            </th>
                             <th class="p-4 font-semibold text-gray-600 w-16">No</th>
                             <th class="p-4 font-semibold text-gray-600">Foto</th>
                             <th class="p-4 font-semibold text-gray-600">Nama</th>
@@ -61,6 +68,9 @@
                     <tbody>
                         @forelse ($teachers as $teacher)
                             <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                <td class="p-4">
+                                    <input type="checkbox" class="teacher-checkbox w-4 h-4" value="{{ $teacher->id }}" @change="updateSelectCount()">
+                                </td>
                                 <td class="p-4 text-gray-800">
                                     {{ $loop->iteration + ($teachers->currentPage() - 1) * $teachers->perPage() }}</td>
                                 <td class="p-4">
@@ -112,7 +122,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="p-8 text-center text-gray-500">
+                                <td colspan="9" class="p-8 text-center text-gray-500">
                                     <i class="fas fa-inbox text-4xl mb-2 block text-gray-300"></i>
                                     <p>Belum ada data guru.</p>
                                 </td>
@@ -204,8 +214,15 @@
                         <input type="file" name="file" accept=".csv, .txt, .xlsx, .xls"
                             class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-blue-500"
                             required>
-                        <p class="text-xs text-gray-500 mt-1">Unduh template terlebih dahulu untuk memastikan format kolom
-                            sesuai (name, nip, gender, phone, address).</p>
+                        <p class="text-xs text-gray-500 mt-1 mb-2">Unduh template terlebih dahulu untuk memastikan format kolom
+                            sesuai (name, nip, gender, phone, address, classroom_id, is_homeroom).</p>
+                        <div class="bg-blue-50 text-blue-800 p-3 rounded text-xs space-y-1">
+                            <strong>Aturan Kolom <code>is_homeroom</code>:</strong>
+                            <ul class="list-disc ml-4 mt-1">
+                                <li>Isi <strong>Ya</strong> jika guru adalah Wali Kelas (wajib isi classroom_id).</li>
+                                <li>Isi <strong>Tidak</strong> jika guru adalah Guru Mapel.</li>
+                            </ul>
+                        </div>
                     </div>
                     <div class="flex justify-end gap-2">
                         <button type="button" @click="importModalOpen = false"
@@ -225,6 +242,7 @@
         function teacherCrud() {
             return {
                 importModalOpen: false,
+                selectedCount: 0,
 
                 init() {
                     @if (session('success'))
@@ -243,6 +261,47 @@
                             text: '{{ session('error') }}',
                         });
                     @endif
+                },
+
+                toggleSelectAll(event) {
+                    const checkboxes = document.querySelectorAll('.teacher-checkbox');
+                    checkboxes.forEach(checkbox => { checkbox.checked = event.target.checked; });
+                    this.updateSelectCount();
+                },
+
+                updateSelectCount() {
+                    this.selectedCount = document.querySelectorAll('.teacher-checkbox:checked').length;
+                },
+
+                bulkDelete() {
+                    const checkboxes = document.querySelectorAll('.teacher-checkbox:checked');
+                    if (checkboxes.length === 0) {
+                        Swal.fire({ icon: 'warning', title: 'Pilih Guru', text: 'Pilih minimal 1 guru untuk dihapus.' });
+                        return;
+                    }
+                    Swal.fire({
+                        title: 'Hapus Guru?',
+                        text: `${checkboxes.length} guru akan dihapus permanen.`,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6',
+                        confirmButtonText: 'Ya, hapus!',
+                        cancelButtonText: 'Batal',
+                        reverseButtons: true
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            const ids = Array.from(checkboxes).map(cb => cb.value);
+                            const form = document.createElement('form');
+                            form.method = 'POST';
+                            form.action = '{{ route('admin.teachers.bulkDestroy') }}';
+                            let idsInput = '';
+                            ids.forEach((id) => { idsInput += `<input type="hidden" name="ids[]" value="${id}">`; });
+                            form.innerHTML = `@csrf ${idsInput}`;
+                            document.body.appendChild(form);
+                            form.submit();
+                        }
+                    });
                 },
 
                 confirmDelete(id, name) {

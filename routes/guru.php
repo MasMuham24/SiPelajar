@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['auth', 'role:guru'])->prefix('guru')->as('guru.')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::resource('assignments', AssignmentController::class);
+    Route::post('/assignments/bulk-delete', [AssignmentController::class, 'bulkDestroy'])->name('assignments.bulkDestroy');
     Route::patch('/assignments/{assignment}/end', [AssignmentController::class, 'end'])->name('assignments.end');
     Route::get('/assignments/{assignment}/submissions', [SubmissionController::class, 'index'])->name('assignments.submissions.index');
     Route::get('/submissions/{submission}', [SubmissionController::class, 'show'])->name('submissions.show');

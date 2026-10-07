@@ -14,11 +14,7 @@ class AttendanceController extends Controller
     public function index()
     {
         $student = Auth::user()->student;
-        $attendances = Attendance::with('classroom')
-            ->where('student_id', $student->id)
-            ->latest()
-            ->paginate(10);
-
+        $attendances = Attendance::with('classroom')->where('student_id', $student->id)->latest()->paginate(10);
         return view('siswa.attendance.index', compact('attendances'));
     }
 
@@ -26,54 +22,34 @@ class AttendanceController extends Controller
     {
         $student = Auth::user()->student;
         $today = today()->toDateString();
-
-        $existing = Attendance::where('student_id', $student->id)
-            ->whereDate('date', $today)
-            ->first();
-
+        $existing = Attendance::where('student_id', $student->id)->whereDate('date', $today)->first();
         if ($existing) {
-            return redirect()->route('siswa.attendance.index')
-                ->with('error', 'Anda sudah melakukan absensi hari ini.');
+            return redirect()->route('siswa.attendance.index')->with('error', 'Anda sudah melakukan absensi hari ini.');
         }
 
         $office = Office::latest()->first();
 
         if (! $office) {
-            return redirect()->route('siswa.attendance.index')
-                ->with('error', 'Lokasi sekolah belum dikonfigurasi oleh admin.');
+            return redirect()->route('siswa.attendance.index')->with('error', 'Lokasi sekolah belum dikonfigurasi oleh admin.');
         }
-
         $latitude = $request->input('latitude');
         $longitude = $request->input('longitude');
-
         if (! $latitude || ! $longitude) {
-            return redirect()->route('siswa.attendance.index')
-                ->with('error', 'Lokasi tidak ditemukan. Pastikan GPS aktif.');
+            return redirect()->route('siswa.attendance.index')->with('error', 'Lokasi tidak ditemukan. Pastikan GPS aktif');
         }
-
-        $distance = $this->calculateDistance(
-            $office->latitude,
-            $office->longitude,
-            $latitude,
-            $longitude
-        );
-
+        $distance = $this->calculateDistance($office->latitude, $office->longitude, $latitude,$longitude);
         if ($distance > $office->radius) {
-            return redirect()->route('siswa.attendance.index')
-                ->with('error', 'Anda berada di luar area sekolah. Jarak: '.round($distance).'m (batas: '.$office->radius.'m)');
+            return redirect()->route('siswa.attendance.index')->with('error', 'Anda berada di luar area sekolah. Jarak: '.round($distance).'m (batas: '.$office->radius.'m)');
         }
-
         $now = now();
         $setting = AttendanceSetting::getSettings();
         $checkinLimit = $setting->getStartLimit($now);
         $lateMinutes = 0;
         $status = 'hadir';
-
         if ($now->gt($checkinLimit)) {
             $lateMinutes = (int) ceil($checkinLimit->diffInSeconds($now) / 60);
             $status = 'terlambat';
         }
-
         Attendance::create([
             'student_id' => $student->id,
             'classroom_id' => $student->classroom_id,
@@ -85,11 +61,7 @@ class AttendanceController extends Controller
             'status' => $status,
             'late_minutes' => $lateMinutes,
         ]);
-
-        $message = $status === 'terlambat'
-            ? 'Absensi masuk tercatat terlambat. Keterlambatan: '.$lateMinutes.' menit.'
-            : 'Absensi masuk berhasil.';
-
+        $message = $status === 'terlambat' ? 'Absensi masuk tercatat terlambat. Keterlambatan: '.$lateMinutes.' menit.' : 'Absensi masuk berhasil.';
         return redirect()->route('siswa.attendance.index')->with('success', $message);
     }
 
@@ -97,46 +69,31 @@ class AttendanceController extends Controller
     {
         $student = Auth::user()->student;
         $today = today()->toDateString();
-
-        $attendance = Attendance::where('student_id', $student->id)
-            ->whereDate('date', $today)
-            ->whereNull('check_out')
-            ->first();
-
+        $attendance = Attendance::where('student_id', $student->id)->whereDate('date', $today)->whereNull('check_out')->first();
         if (! $attendance) {
-            return redirect()->route('siswa.attendance.index')
-                ->with('error', 'Tidak ada absensi masuk hari ini atau sudah checkout.');
+            return redirect()->route('siswa.attendance.index')->with('error', 'Tidak ada absensi masuk hari ini atau sudah checkout.');
         }
-
         $now = now();
         $setting = AttendanceSetting::getSettings();
         $checkoutMin = $setting->getEndLimit($now);
-
         if ($now->lt($checkoutMin)) {
-            return redirect()->route('siswa.attendance.index')
-                ->with('error', 'Checkout baru bisa dilakukan setelah pukul '.$setting->getFormattedEndTime().'.');
+            return redirect()->route('siswa.attendance.index')->with('error', 'Checkout baru bisa dilakukan setelah pukul '.$setting->getFormattedEndTime().'.');
         }
-
         $attendance->update([
             'check_out' => $now->toTimeString(),
         ]);
-
         return redirect()->route('siswa.attendance.index')->with('success', 'Absensi pulang berhasil.');
     }
 
     private function calculateDistance(float $lat1, float $lon1, float $lat2, float $lon2): float
     {
         $earthRadius = 6371000;
-
         $dLat = deg2rad($lat2 - $lat1);
         $dLon = deg2rad($lon2 - $lon1);
-
         $a = sin($dLat / 2) * sin($dLat / 2) +
             cos(deg2rad($lat1)) * cos(deg2rad($lat2)) *
             sin($dLon / 2) * sin($dLon / 2);
-
         $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
-
         return $earthRadius * $c;
     }
 }

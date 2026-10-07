@@ -60,4 +60,19 @@ class OfficeController extends Controller
         $office->delete();
         return redirect()->route('admin.offices.index')->with('success', 'Lokasi Sekolah Berhasil Dihapus');
     }
+
+    public function bulkDestroy()
+    {
+        $rawIds = request()->input('ids', '');
+        $ids = is_array($rawIds) ? $rawIds : explode(',', (string) $rawIds);
+        $ids = array_filter(array_map('trim', $ids));
+        
+        if (empty($ids)) {
+            return redirect()->route('admin.offices.index')->with('error', 'Pilih minimal 1 lokasi untuk dihapus.');
+        }
+
+        Office::destroy($ids);
+
+        return redirect()->route('admin.offices.index')->with('success', 'Berhasil menghapus ' . count($ids) . ' lokasi.');
+    }
 }

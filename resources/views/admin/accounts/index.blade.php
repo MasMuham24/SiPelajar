@@ -5,9 +5,15 @@
 @section('content')
 <div class="flex justify-between items-center mb-6">
     <h1 class="text-2xl font-bold text-gray-800">Kelola Akun Pengguna</h1>
-    <a href="{{ route('admin.accounts.create') }}" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-        <i class="fas fa-plus mr-2"></i> Tambah Akun
-    </a>
+    <div class="flex gap-2">
+        <button id="bulkDeleteBtn" onclick="bulkDelete()" style="display:none"
+            class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">
+            <i class="fas fa-trash mr-2"></i> Hapus (<span id="selectedCount">0</span>)
+        </button>
+        <a href="{{ route('admin.accounts.create') }}" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+            <i class="fas fa-plus mr-2"></i> Tambah Akun
+        </a>
+    </div>
 </div>
 
 <div class="mb-4 flex items-center justify-between">
@@ -58,6 +64,9 @@
                         return route('admin.accounts.index') . '?' . http_build_query($params);
                     };
                 @endphp
+                <th class="px-4 py-3 text-left">
+                    <input type="checkbox" id="selectAll" onchange="toggleSelectAll(this)" class="w-4 h-4">
+                </th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     <a href="{{ $sortUrl('name') }}" class="text-gray-700 hover:text-blue-600 flex items-center">
@@ -97,6 +106,9 @@
         <tbody class="bg-white divide-y divide-gray-200">
             @forelse ($users as $user)
                 <tr>
+                    <td class="px-4 py-4 whitespace-nowrap">
+                        <input type="checkbox" class="account-checkbox w-4 h-4" value="{{ $user->id }}" onchange="updateCount()">
+                    </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $users->firstItem() + $loop->index }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $user->name }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $user->username }}</td>
@@ -130,7 +142,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="6" class="px-6 py-4 text-center text-gray-500">Tidak ada akun pengguna.</td>
+                    <td colspan="7" class="px-6 py-4 text-center text-gray-500">Tidak ada akun pengguna.</td>
                 </tr>
             @endforelse
         </tbody>
@@ -142,4 +154,34 @@
     {{ $users->appends(request()->except('page'))->links() }}
 </div>
 @endif
+
+<script>
+function toggleSelectAll(el) {
+    document.querySelectorAll('.account-checkbox').forEach(cb => { cb.checked = el.checked; });
+    updateCount();
+}
+function updateCount() {
+    const count = document.querySelectorAll('.account-checkbox:checked').length;
+    document.getElementById('selectedCount').textContent = count;
+    document.getElementById('bulkDeleteBtn').style.display = count > 0 ? '' : 'none';
+}
+function bulkDelete() {
+    const checked = document.querySelectorAll('.account-checkbox:checked');
+    if (checked.length === 0) { alert('Pilih minimal 1 akun untuk dihapus.'); return; }
+    if (!confirm(`Apakah Anda yakin ingin menghapus ${checked.length} akun?`)) return;
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '{{ route('admin.accounts.bulkDestroy') }}';
+    form.innerHTML = '@csrf';
+    checked.forEach(cb => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'ids[]';
+        input.value = cb.value;
+        form.appendChild(input);
+    });
+    document.body.appendChild(form);
+    form.submit();
+}
+</script>
 @endsection

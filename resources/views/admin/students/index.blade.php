@@ -23,6 +23,9 @@
             <a href="{{ route('admin.students.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition flex items-center gap-2">
                 <i class="fas fa-plus"></i> Tambah Siswa
             </a>
+            <button @click="bulkDelete()" x-show="selectedCount > 0" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md transition flex items-center gap-2">
+                <i class="fas fa-trash"></i> Hapus (<span x-text="selectedCount"></span>)
+            </button>
         </div>
     </div>
 
@@ -45,6 +48,9 @@
             <table class="w-full text-left border-collapse">
                 <thead>
                     <tr class="bg-gray-50 border-b border-gray-200">
+                        <th class="p-4 font-semibold text-gray-600 w-12">
+                            <input type="checkbox" @change="toggleSelectAll($event)" class="w-4 h-4">
+                        </th>
                         <th class="p-4 font-semibold text-gray-600 w-16">No</th>
                         <th class="p-4 font-semibold text-gray-600">Foto</th>
                         <th class="p-4 font-semibold text-gray-600">Nama</th>
@@ -58,6 +64,9 @@
                 <tbody>
                     @forelse ($students as $student)
                         <tr class="border-b border-gray-100 hover:bg-gray-50">
+                            <td class="p-4">
+                                <input type="checkbox" class="student-checkbox w-4 h-4" value="{{ $student->id }}" @change="updateSelectCount()">
+                            </td>
                             <td class="p-4 text-gray-800">{{ $loop->iteration + ($students->currentPage() - 1) * $students->perPage() }}</td>
                             <td class="p-4">
                                 @if ($student->photo)
@@ -99,7 +108,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="p-8 text-center text-gray-500">
+                            <td colspan="9" class="p-8 text-center text-gray-500">
                                 <i class="fas fa-inbox text-4xl mb-2 block text-gray-300"></i>
                                 <p>Belum ada data siswa.</p>
                             </td>
@@ -208,6 +217,7 @@
     function studentCrud() {
         return {
             importModalOpen: false,
+            selectedCount: 0,
 
             init() {
                 @if (session('success'))
@@ -226,6 +236,47 @@
                         html: {!! json_encode(session('error')) !!},
                     });
                 @endif
+            },
+
+            toggleSelectAll(event) {
+                const checkboxes = document.querySelectorAll('.student-checkbox');
+                checkboxes.forEach(checkbox => { checkbox.checked = event.target.checked; });
+                this.updateSelectCount();
+            },
+
+            updateSelectCount() {
+                this.selectedCount = document.querySelectorAll('.student-checkbox:checked').length;
+            },
+
+            bulkDelete() {
+                const checkboxes = document.querySelectorAll('.student-checkbox:checked');
+                if (checkboxes.length === 0) {
+                    Swal.fire({ icon: 'warning', title: 'Pilih Siswa', text: 'Pilih minimal 1 siswa untuk dihapus.' });
+                    return;
+                }
+                Swal.fire({
+                    title: 'Hapus Siswa?',
+                    text: `${checkboxes.length} siswa akan dihapus permanen.`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Ya, hapus!',
+                    cancelButtonText: 'Batal',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const ids = Array.from(checkboxes).map(cb => cb.value);
+                        const form = document.createElement('form');
+                        form.method = 'POST';
+                        form.action = '{{ route('admin.students.bulkDestroy') }}';
+                        let idsInput = '';
+                        ids.forEach((id) => { idsInput += `<input type="hidden" name="ids[]" value="${id}">`; });
+                        form.innerHTML = `@csrf ${idsInput}`;
+                        document.body.appendChild(form);
+                        form.submit();
+                    }
+                });
             },
 
             confirmDelete(id, name) {

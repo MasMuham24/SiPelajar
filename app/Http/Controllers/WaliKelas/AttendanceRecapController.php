@@ -15,7 +15,6 @@ class AttendanceRecapController extends Controller
     public function index(Request $request)
     {
         $data = $this->getRecapData($request);
-
         return view('wali.attendance.recap', $data);
     }
 
@@ -26,7 +25,6 @@ class AttendanceRecapController extends Controller
             abort(404, 'Kelas wali tidak ditemukan.');
         }
         $pdf = Pdf::loadView('wali.attendance.recap-pdf', $data)->setPaper('a4', 'landscape');
-
         return $pdf->download(
             'rekap-absensi-'.str_replace(' ', '-', strtolower($data['classroom']->name)).'-'.$data['month'].'-'.$data['year'].'.pdf'
         );
@@ -35,11 +33,9 @@ class AttendanceRecapController extends Controller
     public function excel(Request $request)
     {
         $data = $this->getRecapData($request);
-
         if (! $data['classroom']) {
             abort(404, 'Kelas wali tidak ditemukan.');
         }
-
         $spreadsheet = new Spreadsheet;
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle('Rekap Absensi');
@@ -51,7 +47,6 @@ class AttendanceRecapController extends Controller
             'B3',
             sprintf('%02d/%d', $data['month'], $data['year'])
         );
-
         $headers = [
             'No',
             'Nama Siswa',
@@ -62,7 +57,6 @@ class AttendanceRecapController extends Controller
             'Alpha',
             'Total',
         ];
-
         $headerRow = 5;
         foreach ($headers as $column => $header) {
             $sheet->setCellValue(
@@ -70,7 +64,6 @@ class AttendanceRecapController extends Controller
                 $header
             );
         }
-
         $row = 6;
         foreach ($data['recaps'] as $index => $recap) {
             $sheet->setCellValue('A'.$row, $index + 1);
@@ -83,7 +76,6 @@ class AttendanceRecapController extends Controller
             $sheet->setCellValue('H'.$row, $recap['total']);
             $row++;
         }
-
         $sheet->mergeCells('A1:H1');
         $sheet->getStyle('A1:H1')->getFont()->setBold(true);
         $sheet->getStyle('A5:H5')->getFont()->setBold(true);
@@ -94,7 +86,6 @@ class AttendanceRecapController extends Controller
         }
         $filename = 'rekap-absensi-'.str_replace(' ', '-', strtolower($data['classroom']->name)).'-'.$data['month'].'-'.$data['year'].'.xlsx';
         $writer = new Xlsx($spreadsheet);
-
         return response()->streamDownload(
             function () use ($writer) {
                 $writer->save('php://output');
@@ -115,7 +106,6 @@ class AttendanceRecapController extends Controller
         if (! $teacher || ! $teacher->classroom) {
             return ['classroom' => null, 'recaps' => collect(), 'month' => $month, 'year' => $year];
         }
-
         $classroom = $teacher->classroom;
         $students = $classroom->students()->orderBy('name')->get();
         $recaps = $students->map(function ($student) use ($month, $year) {
@@ -130,12 +120,6 @@ class AttendanceRecapController extends Controller
                 'total' => $attendances->count(),
             ];
         });
-
-        return compact(
-            'classroom',
-            'recaps',
-            'month',
-            'year'
-        );
+        return compact('classroom','recaps','month','year');
     }
 }

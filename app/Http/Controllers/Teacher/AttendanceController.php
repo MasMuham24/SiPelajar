@@ -17,7 +17,6 @@ class AttendanceController extends Controller
         if ($request->ajax() || $request->wantsJson()) {
             return $this->data($request);
         }
-
         $date = $request->query('date', today()->toDateString());
         $attendances = Attendance::with(['student.user', 'classroom'])
             ->whereNotNull('student_id')
@@ -25,7 +24,6 @@ class AttendanceController extends Controller
             ->latest()
             ->paginate(10)
             ->withQueryString();
-
         return view('teacher.attendance.index', compact('attendances', 'date'));
     }
 

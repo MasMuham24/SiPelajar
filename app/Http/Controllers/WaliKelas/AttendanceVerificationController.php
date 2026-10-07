@@ -15,7 +15,6 @@ class AttendanceVerificationController extends Controller
     public function index(Request $request)
     {
         $teacher = Auth::user()->teacher;
-
         if (! $teacher || ! $teacher->classroom_id) {
             abort(403, 'Anda belum memiliki kelas wali.');
         }
@@ -54,9 +53,7 @@ class AttendanceVerificationController extends Controller
             'verified_at' => now(),
             'teacher_note' => $request->teacher_note,
         ]);
-
         return back()->with('success','Status absensi berhasil diperbarui.');
-
     }
 
     /**
@@ -67,16 +64,10 @@ class AttendanceVerificationController extends Controller
         if ($attendance->student->classroom_id != $teacher->classroom_id) {
             abort(403);
         }
-        $attendance->load([
-            'student.user',
+        $attendance->load(['student.user',
             'student.classroom',
             'verifier',
         ]);
-
-        return view(
-            'wali.attendance.show',
-            compact('attendance')
-        );
-
+        return view('wali.attendance.show',compact('attendance'));
     }
 }

@@ -9,9 +9,14 @@
             <h2 class="text-xl sm:text-2xl font-bold text-gray-800">Data Tugas</h2>
             <p class="text-sm text-gray-500 mt-1">Kelola tugas untuk kelas yang diajar.</p>
         </div>
-        <a href="{{ route('guru.assignments.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition flex items-center gap-2">
-            <i class="fas fa-plus"></i> Tambah Tugas
-        </a>
+        <div class="flex gap-2">
+            <button @click="bulkDelete()" x-show="selectedCount > 0" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md transition flex items-center gap-2">
+                <i class="fas fa-trash"></i> Hapus (<span x-text="selectedCount"></span>)
+            </button>
+            <a href="{{ route('guru.assignments.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition flex items-center gap-2">
+                <i class="fas fa-plus"></i> Tambah Tugas
+            </a>
+        </div>
     </div>
 
     <div class="bg-white rounded-lg shadow-md overflow-hidden">
@@ -19,6 +24,9 @@
             <table class="w-full text-left border-collapse">
                 <thead>
                     <tr class="bg-gray-50 border-b border-gray-200">
+                        <th class="p-4 font-semibold text-gray-600 w-12">
+                            <input type="checkbox" @change="toggleSelectAll($event)" class="w-4 h-4">
+                        </th>
                         <th class="p-4 font-semibold text-gray-600 w-16">No</th>
                         <th class="p-4 font-semibold text-gray-600">Judul</th>
                         <th class="p-4 font-semibold text-gray-600">Kelas</th>
@@ -31,6 +39,9 @@
                 <tbody>
                     @forelse ($assignments as $assignment)
                         <tr class="border-b border-gray-100 hover:bg-gray-50">
+                            <td class="p-4">
+                                <input type="checkbox" class="assignment-checkbox w-4 h-4" value="{{ $assignment->id }}" @change="updateSelectCount()">
+                            </td>
                             <td class="p-4 text-gray-800">{{ $loop->iteration + ($assignments->currentPage() - 1) * $assignments->perPage() }}</td>
                             <td class="p-4 text-gray-800 font-medium">{{ $assignment->title }}</td>
                             <td class="p-4 text-gray-800">{{ $assignment->classroom->name ?? '-' }}</td>
@@ -60,7 +71,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="p-8 text-center text-gray-500">
+                            <td colspan="7" class="p-8 text-center text-gray-500">
                                 <i class="fas fa-inbox text-4xl mb-2 block text-gray-300"></i>
                                 <p>Belum ada data tugas.</p>
                             </td>
@@ -114,6 +125,49 @@
 <script>
     function assignmentCrud() {
         return {
+            selectedCount: 0,
+
+            toggleSelectAll(event) {
+                const checkboxes = document.querySelectorAll('.assignment-checkbox');
+                checkboxes.forEach(checkbox => { checkbox.checked = event.target.checked; });
+                this.updateSelectCount();
+            },
+
+            updateSelectCount() {
+                this.selectedCount = document.querySelectorAll('.assignment-checkbox:checked').length;
+            },
+
+            bulkDelete() {
+                const checkboxes = document.querySelectorAll('.assignment-checkbox:checked');
+                if (checkboxes.length === 0) {
+                    Swal.fire({ icon: 'warning', title: 'Pilih Tugas', text: 'Pilih minimal 1 tugas untuk dihapus.' });
+                    return;
+                }
+                Swal.fire({
+                    title: 'Hapus Tugas?',
+                    text: `${checkboxes.length} tugas akan dihapus permanen.`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Ya, hapus!',
+                    cancelButtonText: 'Batal',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const ids = Array.from(checkboxes).map(cb => cb.value);
+                        const form = document.createElement('form');
+                        form.method = 'POST';
+                        form.action = '{{ route('guru.assignments.bulkDestroy') }}';
+                        let idsInput = '';
+                        ids.forEach((id) => { idsInput += `<input type="hidden" name="ids[]" value="${id}">`; });
+                        form.innerHTML = `@csrf ${idsInput}`;
+                        document.body.appendChild(form);
+                        form.submit();
+                    }
+                });
+            },
+
             confirmDelete(id, title) {
                 Swal.fire({
                     title: 'Hapus Tugas?',

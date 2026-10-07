@@ -577,4 +577,24 @@ class StudentController extends Controller
         return redirect()->route('admin.students.index')->with('success','Data siswa berhasil dihapus');
 
     }
+
+    public function bulkDestroy()
+    {
+        $rawIds = request()->input('ids', '');
+        $ids = is_array($rawIds) ? $rawIds : explode(',', (string) $rawIds);
+        $ids = array_filter(array_map('trim', $ids));
+        
+        if (empty($ids)) {
+            return redirect()->route('admin.students.index')->with('error', 'Pilih minimal 1 siswa untuk dihapus.');
+        }
+
+        $students = Student::whereIn('id', $ids)->get();
+        foreach ($students as $student) {
+            if ($student->photo) {Storage::disk('public')->delete($student->photo);}
+            $student->user()->delete();
+            $student->delete();
+        }
+
+        return redirect()->route('admin.students.index')->with('success', 'Berhasil menghapus ' . count($ids) . ' siswa.');
+    }
 }

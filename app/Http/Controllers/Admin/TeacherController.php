@@ -20,7 +20,7 @@ class TeacherController extends Controller
      */
     public function downloadTemplate()
     {
-        $headers = ['name','nip','gender','phone','address','classroom_id'];
+        $headers = ['name','nip','gender','phone','address','classroom_id','is_homeroom'];
         $callback = function () use ($headers) {$file = fopen('php://output', 'w');fputcsv($file, $headers);fclose($file);};
         return response()->streamDownload($callback, 'teacher_template.csv',['Content-Type' => 'text/csv; charset=utf-8','Content-Disposition' => 'attachment; filename="teacher_template.csv"',]);
     }
@@ -60,14 +60,17 @@ class TeacherController extends Controller
         $header = array_map(function($h){
             return strtolower(trim(preg_replace('/[\x00-\x1F\x80-\xFF]/','',(string)$h)));
         },$rows[0]);
+        
         $expectedHeaders = [
             'name',
             'nip',
             'gender',
             'phone',
             'address',
-            'classroom_id'
+            'classroom_id',
+            'is_homeroom'
         ];
+        
         if(array_diff($expectedHeaders,$header)!==array()||array_diff($header,$expectedHeaders)!==array()){
             return redirect()->route('admin.teachers.index')->with('error',
                     'Format header tidak sesuai. Gunakan: '.implode(', ',$expectedHeaders)
@@ -83,6 +86,13 @@ class TeacherController extends Controller
                 if(empty(array_filter($row))){
                     continue;
                 }
+                
+                if (count($header) > count($row)) {
+                    $row = array_pad($row, count($header), null);
+                } else if (count($header) < count($row)) {
+                    $row = array_slice($row, 0, count($header));
+                }
+                
                 $data=array_combine($header,$row);
                 $data=array_map(function($val){
                     return trim((string)$val);
@@ -99,11 +109,36 @@ class TeacherController extends Controller
                     $errorRows[]="Baris {$rowNum}: NIP sudah terdaftar.";
                     continue;
                 }
+                
+                $isHomeroomStr = strtolower($data['is_homeroom'] ?? '');
+                $isHomeroom = $isHomeroomStr === 'ya';
+                $isNotHomeroom = $isHomeroomStr === 'tidak';
+                
+                if ($data['is_homeroom'] === '' || (!$isHomeroom && !$isNotHomeroom)) {
+                    $errorRows[]="Baris {$rowNum}: is_homeroom tidak valid (Gunakan: Ya/Tidak).";
+                    continue;
+                }
+                
                 $classroomId = empty($data['classroom_id']) ? null : $data['classroom_id'];
-                if($classroomId !== null && !\App\Models\Classroom::where('id',$classroomId)->exists()){
+                
+                if ($isHomeroom) {
+                    if ($classroomId === null) {
+                        $errorRows[]="Baris {$rowNum}: Classroom ID wajib diisi untuk Wali Kelas.";
+                        continue;
+                    }
+                    if(!\App\Models\Classroom::where('id',$classroomId)->exists()){
+                        $errorRows[]="Baris {$rowNum}: Classroom ID {$classroomId} tidak ditemukan.";
+                        continue;
+                    }
+                    if(Teacher::where('classroom_id',$classroomId)->exists()){
+                        $errorRows[]="Baris {$rowNum}: Classroom ID {$classroomId} sudah memiliki wali kelas.";
+                        continue;
+                    }
+                } elseif ($classroomId !== null && !\App\Models\Classroom::where('id',$classroomId)->exists()){
                     $errorRows[]="Baris {$rowNum}: Classroom ID {$classroomId} tidak ditemukan.";
                     continue;
                 }
+
                 $username=$this->generateUsername($data['name']);
                 $user=User::create([
                     'name'=>$data['name'],
@@ -117,7 +152,7 @@ class TeacherController extends Controller
                     'gender'=>$data['gender'],
                     'phone'=>empty($data['phone']) ? null : $data['phone'],
                     'address'=>empty($data['address']) ? null : $data['address'],
-                    'classroom_id'=>$classroomId,
+                    'classroom_id'=> $isHomeroom ? $classroomId : null,
                 ]);
                 $importedCount++;
             }
@@ -241,5 +276,27 @@ class TeacherController extends Controller
         $teacher->user()->delete();
         $teacher->delete();
         return redirect()->route('admin.teachers.index')->with('success','Data guru berhasil dihapus.');
+    }
+
+    public function bulkDestroy()
+    {
+        $rawIds = request()->input('ids', '');
+        $ids = is_array($rawIds) ? $rawIds : explode(',', (string) $rawIds);
+        $ids = array_filter(array_map('trim', $ids));
+        
+        if (empty($ids)) {
+            return redirect()->route('admin.teachers.index')->with('error', 'Pilih minimal 1 guru untuk dihapus.');
+        }
+
+        $teachers = Teacher::whereIn('id', $ids)->get();
+        foreach ($teachers as $teacher) {
+            if($teacher->photo){
+                Storage::disk('public')->delete($teacher->photo);
+            }
+            $teacher->user()->delete();
+            $teacher->delete();
+        }
+
+        return redirect()->route('admin.teachers.index')->with('success', 'Berhasil menghapus ' . count($ids) . ' guru.');
     }
 }
