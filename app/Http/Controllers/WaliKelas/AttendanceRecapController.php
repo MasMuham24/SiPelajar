@@ -67,7 +67,7 @@ class AttendanceRecapController extends Controller
         $row = 6;
         foreach ($data['recaps'] as $index => $recap) {
             $sheet->setCellValue('A'.$row, $index + 1);
-            $sheet->setCellValue('B'.$row, $recap['student']->name);
+            $sheet->setCellValue('B'.$row, $recap['student']->user->name ?? $recap['student']->name);
             $sheet->setCellValue('C'.$row, $recap['hadir']);
             $sheet->setCellValue('D'.$row, $recap['terlambat']);
             $sheet->setCellValue('E'.$row, $recap['izin']);
@@ -107,7 +107,7 @@ class AttendanceRecapController extends Controller
             return ['classroom' => null, 'recaps' => collect(), 'month' => $month, 'year' => $year];
         }
         $classroom = $teacher->classroom;
-        $students = $classroom->students()->orderBy('name')->get();
+        $students = $classroom->students()->with('user')->orderBy('name')->get();
         $recaps = $students->map(function ($student) use ($month, $year) {
             $attendances = Attendance::query()->where('student_id', $student->id)->where('classroom_id', $student->classroom_id)->whereMonth('date', $month)->whereYear('date', $year)->get();
             return [
